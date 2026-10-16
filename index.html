@@ -566,7 +566,8 @@ body.ac-open .ac-scrim{opacity:1;pointer-events:auto}
 const WORKER_URL = "https://acme-aiva-demo.b00784180.workers.dev";
 const POLL_MS = 1500;
 const GIVE_UP_MS = 6 * 60 * 1000;
-const NO_ANSWER_MS = 3 * 60 * 1000;
+const NO_ANSWER_MS = 5 * 60 * 1000;
+const ASSUME_LIVE_MS = 5000; // without the Aircall webhook, show the call as live 5s after Aircall accepts it
 
 /* passcode comes from the AE's link (?key=...) and is remembered on this browser */
 const params = new URLSearchParams(location.search);
@@ -792,9 +793,10 @@ async function pollCall(leadId, alive) {
       if (liveSince) stopTimer(s.duration ?? Math.round((Date.now() - liveSince) / 1000));
       return s.result;
     }
-    // Without the Aircall webhook we can't see "answered"; show a neutral in-progress state after a short ring.
-    if (!liveSince && s.status === "dialing" && Date.now() - started > 12000) {
-      $("call-note").textContent = "Call in progress. Results appear here as soon as the agent wraps up.";
+    // Without the Aircall webhook we can't see "answered"; move to the live step 5s after Aircall accepted the call.
+    if (!liveSince && s.status === "dialing" && Date.now() - started > ASSUME_LIVE_MS) {
+      liveSince = Date.now();
+      setCallStep("in_call"); startTimer(liveSince);
     }
     if (s.status === "call_ended" && Date.now() - (s.ended_at || Date.now()) > 45000) {
       $("call-note").textContent = "The call ended before the agent collected the qualification (voicemail or early hang-up).";
@@ -802,8 +804,8 @@ async function pollCall(leadId, alive) {
     }
     lastStatus = s.status;
     // No webhook signal and no result after 3 minutes: most likely no answer or voicemail (the agent only reports on real conversations).
-    if (!liveSince && s.status === "dialing" && Date.now() - started > NO_ANSWER_MS) {
-      stopTimer(); $("n2").classList.remove("active");
+    if (s.status === "dialing" && Date.now() - started > NO_ANSWER_MS) {
+      stopTimer(); $("n2").classList.remove("active", "is-live");
       $("call-note").textContent = "No result yet. The lead may not have answered, or the call went to voicemail.";
       return null;
     }
