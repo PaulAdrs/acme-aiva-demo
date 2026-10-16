@@ -566,6 +566,7 @@ body.ac-open .ac-scrim{opacity:1;pointer-events:auto}
 const WORKER_URL = "";
 const POLL_MS = 1500;
 const GIVE_UP_MS = 6 * 60 * 1000;
+const NO_ANSWER_MS = 3 * 60 * 1000;
 
 /* passcode comes from the AE's link (?key=...) and is remembered on this browser */
 const params = new URLSearchParams(location.search);
@@ -800,7 +801,13 @@ async function pollCall(leadId, alive) {
       return null;
     }
     lastStatus = s.status;
-    if (Date.now() - started > GIVE_UP_MS) { $("call-note").textContent = "No result received from the call."; return null; }
+    // No webhook signal and no result after 3 minutes: most likely no answer or voicemail (the agent only reports on real conversations).
+    if (!liveSince && s.status === "dialing" && Date.now() - started > NO_ANSWER_MS) {
+      stopTimer(); $("n2").classList.remove("active");
+      $("call-note").textContent = "No result yet. The lead may not have answered, or the call went to voicemail.";
+      return null;
+    }
+    if (Date.now() - started > GIVE_UP_MS) { $("n2").classList.remove("active", "is-live"); stopTimer(); $("call-note").textContent = "No result received from the call."; return null; }
   }
   return null;
 }
