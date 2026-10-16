@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Corp | The revenue platform for growing teams</title>
+<meta name="description" content="Acme brings CRM, analytics, support and automation into one workspace for growing sales teams.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232B3FE0'/%3E%3Cpath d='M16 6 26 26h-5l-5-10.5L11 26H6z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+/* ============ ACME (the fake customer website) ============ */
+:root{
+  --ink:#0F1B3D;          /* headlines, nav */
+  --ink-2:#47506B;        /* body */
+  --ink-3:#7D849B;        /* muted */
+  --paper:#FBFBFE;        /* page */
+  --mist:#EEF0FB;         /* tinted panels */
+  --line:#DDE1F0;
+  --cobalt:#2B3FE0;       /* Acme brand */
+  --cobalt-deep:#1D2BA8;
+  --sun:#FFB627;          /* small highlight */
+  --display:'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --body:'Figtree', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Aircall 2026 brand tokens (side panel) */
+  --ac-surface-primary:#FFFEFA;
+  --ac-surface-secondary:#F7F6F0;
+  --ac-surface-brand:#008F6D;
+  --ac-surface-invert:#002620;
+  --ac-text-primary:#1A3C36;
+  --ac-text-secondary:#4D6763;
+  --ac-text-brand:#008F6D;
+  --ac-text-invert:#FFFEFA;
+  --ac-text-invert-2:#F2F1EB;
+  --ac-border:#B3BEBC;
+  --ac-live:#D6453D;
+  --ac-serif:'ITC Garamond Narrow', Georgia, 'Times New Roman', serif;
+  --ac-sans:'Fellix', 'Helvetica Neue', Arial, sans-serif;
+  --ac-mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ac-dawn:linear-gradient(135deg,#B8B0D0,#E8C8D0,#C0D8E8);
+  --ac-city:linear-gradient(135deg,#2A2645,#C45C6E 45%,#6BBAB0 80%,#1E3A50);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink-2);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img,svg{display:block}
+:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* announcement */
+.announce{background:var(--ink);color:#C9CFEA;font-size:14px;text-align:center;padding:9px 16px}
+.announce a{color:#fff;font-weight:600;text-decoration:none;margin-left:6px}
+.announce a:hover{text-decoration:underline}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:20;background:rgba(251,251,254,.96);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;height:68px;gap:32px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em}
+.nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-weight:500;font-size:15px;color:var(--ink)}
+.nav ul a{text-decoration:none}
+.nav ul a:hover{color:var(--cobalt)}
+.nav .right{margin-left:auto;display:flex;align-items:center;gap:18px;font-weight:500;font-size:15px;color:var(--ink)}
+.nav .right a{text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;font-family:var(--body);font-weight:600;font-size:15px;cursor:pointer;text-decoration:none;transition:background .15s}
+.btn-primary{background:var(--cobalt);color:#fff;padding:11px 18px}
+.btn-primary:hover{background:var(--cobalt-deep)}
+.btn-ghost{background:transparent;color:var(--ink);padding:11px 18px;box-shadow:inset 0 0 0 1px var(--line)}
+
+/* hero */
+.hero{position:relative;overflow:hidden;padding:72px 0 88px}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(700px 380px at 85% 10%,#E3E7FF 0,transparent 70%),
+  radial-gradient(500px 300px at 0% 100%,#FFF1D6 0,transparent 70%);pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:start}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 6px;font-size:14px;color:var(--ink);font-weight:500}
+.pill b{background:var(--sun);color:var(--ink);border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700}
+h1{font-family:var(--display);font-weight:800;color:var(--ink);font-size:clamp(2.6rem,5.2vw,4.4rem);line-height:1.02;letter-spacing:-.035em;margin:22px 0 22px}
+.lede{font-size:19px;max-width:34em;margin:0 0 30px;color:var(--ink-2)}
+.checks{list-style:none;padding:0;margin:0 0 34px;display:grid;gap:12px}
+.checks li{display:flex;gap:12px;align-items:flex-start;color:var(--ink);font-weight:500}
+.checks svg{flex:none;margin-top:2px}
+.proof{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--ink-3)}
+.stars{display:flex;gap:2px;color:var(--sun)}
+.avatars{display:flex}
+.avatars span{width:32px;height:32px;border-radius:50%;border:2px solid var(--paper);margin-left:-8px;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff}
+.avatars span:first-child{margin-left:0}
+
+/* form card */
+.form-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px;box-shadow:0 24px 60px -24px rgba(15,27,61,.25)}
+.form-card h2{font-family:var(--display);font-weight:700;color:var(--ink);font-size:26px;letter-spacing:-.02em;margin:0 0 6px}
+.form-card .sub{margin:0 0 22px;font-size:15px;color:var(--ink-2)}
+.form-card .sub strong{color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label,.field .lbl{font-size:13px;font-weight:600;color:var(--ink)}
+.field input,.field select{font:inherit;font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%;transition:border-color .15s, box-shadow .15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--cobalt);box-shadow:0 0 0 3px rgba(43,63,224,.15)}
+.field input:invalid:not(:placeholder-shown){border-color:#E0566B}
+.phone{display:grid;grid-template-columns:118px 1fr;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.chip span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;transition:all .15s;background:#fff}
+.chip input:checked + span{background:var(--mist);border-color:var(--cobalt);color:var(--cobalt-deep)}
+.chip input:focus-visible + span{outline:2px solid var(--cobalt);outline-offset:2px}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink-2);margin:6px 0 18px}
+.consent input{margin-top:3px;accent-color:var(--cobalt)}
+.form-card .btn-primary{width:100%;padding:15px;font-size:16px}
+.form-card .btn-primary[disabled]{opacity:.6;cursor:progress}
+.form-msg{font-size:14px;margin-top:12px;min-height:1em;color:#B3263E}
+.fine{font-size:12px;color:var(--ink-3);margin:14px 0 0;text-align:center}
+
+/* logos */
+.logos{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff}
+.logos .wrap{display:flex;align-items:center;gap:40px;padding-top:26px;padding-bottom:26px;flex-wrap:wrap;justify-content:space-between}
+.logos p{margin:0;font-size:14px;color:var(--ink-3);max-width:12em}
+.logos .names{display:flex;gap:44px;flex-wrap:wrap;align-items:center;color:#9AA1B8}
+.logos .names span{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:-.02em}
+.logos .names span:nth-child(2){font-family:Georgia,serif;font-style:italic;font-weight:400}
+.logos .names span:nth-child(4){letter-spacing:.18em;font-size:16px}
+.logos .names span:nth-child(5){font-family:var(--body);font-weight:800}
+
+/* products */
+.products{padding:96px 0}
+.section-head{max-width:640px;margin-bottom:44px}
+.section-head h2{font-family:var(--display);font-weight:800;color:var(--ink);font-size:clamp(2rem,3.6vw,2.9rem);letter-spacing:-.03em;line-height:1.05;margin:0 0 14px}
+.section-head p{margin:0;font-size:18px}
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-direction:column}
+.tile h3{font-family:var(--display);font-weight:700;color:var(--ink);font-size:21px;margin:14px 0 6px;letter-spacing:-.01em}
+.tile p{margin:0;font-size:15px}
+.tile .ico{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;background:var(--mist);color:var(--cobalt)}
+.tile.crm{grid-column:span 4;grid-row:span 2;background:var(--ink);border-color:var(--ink);color:#BFC6E6}
+.tile.crm h3{color:#fff;font-size:26px}
+.tile.crm .ico{background:rgba(255,255,255,.1);color:#fff}
+.tile.t2,.tile.t3{grid-column:span 2}
+.tile.t4{grid-column:span 6;flex-direction:row;align-items:center;gap:28px;background:var(--mist);border-color:transparent}
+.tile.t4 h3{margin-top:0}
+.tile.t4 .btn{margin-left:auto;flex:none}
+.kanban{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;flex:1}
+.col{background:rgba(255,255,255,.06);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.col h4{margin:0 0 4px;font-size:12px;font-weight:600;color:#8E97C2;display:flex;justify-content:space-between}
+.deal{background:#fff;border-radius:9px;padding:10px 11px;color:var(--ink);font-size:13px}
+.deal b{display:block;font-weight:600}
+.deal small{color:var(--ink-3);display:flex;justify-content:space-between;margin-top:3px}
+.deal.hot{box-shadow:inset 3px 0 0 var(--sun)}
+
+/* quote */
+.quote{padding:0 0 96px}
+.quote .box{display:grid;grid-template-columns:1.4fr 1fr;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.quote blockquote{margin:0;padding:48px;font-family:var(--display);font-weight:500;color:var(--ink);font-size:clamp(1.3rem,2.2vw,1.75rem);line-height:1.3;letter-spacing:-.01em}
+.quote cite{display:block;margin-top:24px;font-family:var(--body);font-style:normal;font-size:15px;color:var(--ink-2)}
+.quote cite b{color:var(--ink)}
+.quote .stat{background:var(--cobalt);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:flex-end}
+.quote .stat strong{font-family:var(--display);font-weight:800;font-size:clamp(3.4rem,6vw,5rem);line-height:1;letter-spacing:-.04em}
+.quote .stat span{font-size:16px;color:#D5DAFF;margin-top:8px;max-width:16em}
+
+footer{background:var(--ink);color:#9AA3C7;padding:56px 0 40px;font-size:14px}
+footer .wrap{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:32px}
+footer .logo{color:#fff;margin-bottom:12px}
+footer h5{color:#fff;font-size:14px;margin:0 0 12px;font-weight:600}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+footer a{text-decoration:none}
+footer a:hover{color:#fff}
+footer .legal{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.1);padding-top:22px;margin-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+@media (max-width: 980px){
+  .nav ul{display:none}
+  .hero .wrap{grid-template-columns:1fr;gap:44px}
+  .bento{grid-template-columns:1fr 1fr}
+  .tile.crm,.tile.t4{grid-column:span 2}
+  .tile.t2,.tile.t3{grid-column:span 1}
+  .quote .box{grid-template-columns:1fr}
+  footer .wrap{grid-template-columns:1fr 1fr}
+}
+@media (max-width: 600px){
+  .wrap{padding:0 16px}
+  .nav .right a.signin{display:none}
+  .hero{padding:44px 0 64px}
+  .form-card{padding:22px}
+  .grid2{grid-template-columns:1fr;gap:0}
+  .bento{grid-template-columns:1fr}
+  .tile.crm,.tile.t2,.tile.t3,.tile.t4{grid-column:span 1}
+  .tile.t4{flex-direction:column;align-items:flex-start}
+  .tile.t4 .btn{margin-left:0}
+  .kanban{grid-template-columns:1fr 1fr}
+  .kanban .col:nth-child(3){display:none}
+  .quote blockquote,.quote .stat{padding:30px}
+  .logos .names{gap:26px}
+}
+
+/* ============ AIRCALL BEHIND-THE-SCENES PANEL ============ */
+.ac-scrim{position:fixed;inset:0;background:rgba(0,38,32,.10);opacity:0;pointer-events:none;transition:opacity 1.2s ease;z-index:40}
+.ac-panel{position:fixed;top:0;right:0;bottom:0;width:max(33vw,440px);max-width:100vw;background:var(--ac-surface-primary);border-left:.5px solid var(--ac-border);z-index:50;transform:translateX(100%);transition:transform 1.3s cubic-bezier(.65,0,.35,1);display:flex;flex-direction:column;font-family:var(--ac-sans);color:var(--ac-text-secondary);box-shadow:-20px 0 60px -20px rgba(0,38,32,.25)}
+body.ac-open .ac-panel{transform:none}
+body.ac-open .ac-scrim{opacity:1;pointer-events:auto}
+.ac-head{position:relative;background:var(--ac-city);color:var(--ac-text-invert);padding:18px 26px 20px;flex:none;overflow:hidden}
+.ac-head .row{display:flex;align-items:center;justify-content:space-between}
+.ac-wordmark{font-family:var(--ac-sans);font-weight:700;font-size:21px;letter-spacing:-.02em;color:var(--ac-text-invert);display:flex;align-items:center;gap:8px}
+.ac-close{background:transparent;border:.5px solid rgba(255,254,250,.4);color:var(--ac-text-invert);width:36px;height:36px;border-radius:8px;display:grid;place-items:center;cursor:pointer}
+.ac-close:hover{opacity:.88}
+.ac-eyebrow{font-family:var(--ac-mono);font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.ac-head .ac-eyebrow{margin-top:14px;color:var(--ac-text-invert-2);opacity:.9}
+.ac-head h2{font-family:var(--ac-serif);font-weight:400;font-size:27px;line-height:1.08;margin:6px 0 0;color:var(--ac-text-invert);letter-spacing:-.01em}
+.ac-mode{display:inline-flex;align-items:center;gap:6px;margin-top:10px;border:.5px solid rgba(255,254,250,.45);border-radius:999px;padding:4px 10px;color:var(--ac-text-invert)}
+.ac-mode i{width:6px;height:6px;border-radius:50%;background:#6BBAB0}
+.ac-body{flex:1;overflow-y:auto;padding:26px 26px 40px;background:var(--ac-surface-primary)}
+.ac-foot{flex:none;border-top:.5px solid var(--ac-border);padding:14px 26px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--ac-surface-secondary)}
+.ac-foot small{font-size:12px;color:var(--ac-text-secondary)}
+.ac-btn{height:40px;padding:0 18px;border-radius:8px;font-family:var(--ac-mono);font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:.5px solid var(--ac-border);background:transparent;color:var(--ac-text-primary)}
+.ac-btn.primary{background:var(--ac-surface-brand);color:var(--ac-text-invert);border:0}
+.ac-btn:hover{opacity:.88}
+
+/* flow */
+.flow{position:relative}
+.node{position:relative;background:var(--ac-surface-primary);border:.5px solid var(--ac-border);border-radius:16px;opacity:0;transform:scale(.6);transform-origin:50% 0;transition:border-color .5s, box-shadow .5s}
+.node .nh{border-radius:16px 16px 0 0}
+.node.show{animation:pop .9s cubic-bezier(.2,.9,.3,1) forwards}
+@keyframes pop{0%{opacity:0;transform:scale(.6) translateY(14px)}45%{opacity:1;transform:scale(1.06) translateY(-4px)}65%{transform:scale(.97) translateY(1px)}82%{transform:scale(1.015)}100%{opacity:1;transform:none}}
+.node.active{border-color:var(--ac-surface-brand);box-shadow:0 0 0 3px rgba(0,143,109,.10), 0 10px 30px -12px rgba(0,38,32,.25)}
+#n2.active{animation:pop .9s cubic-bezier(.2,.9,.3,1) forwards, glow 2.2s ease-in-out .9s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 1px rgba(0,143,109,.35), 0 0 10px 0 rgba(0,143,109,.18)}50%{box-shadow:0 0 0 3px rgba(0,143,109,.55), 0 0 34px 8px rgba(0,143,109,.38)}}
+.node .nh{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--ac-surface-secondary);border-bottom:.5px solid var(--ac-border)}
+.node.active .nh{background:var(--ac-dawn)}
+.node .glyph{width:38px;height:38px;flex:none;border-radius:10px;border:.5px solid var(--ac-border);display:grid;place-items:center;color:var(--ac-text-brand);background:var(--ac-surface-primary)}
+.node .nh .t{min-width:0}
+.node .nh .ac-eyebrow{color:var(--ac-text-secondary);font-size:10px}
+.node .nh h3{font-family:var(--ac-serif);font-weight:400;font-size:22px;color:var(--ac-text-primary);margin:2px 0 0;line-height:1.1}
+.node .nh .when{margin-left:auto;font-family:var(--ac-mono);font-size:10px;font-weight:600;color:var(--ac-text-secondary);letter-spacing:.04em;align-self:flex-start;white-space:nowrap}
+.node .nb{padding:14px 16px 16px;font-size:14px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;margin:0}
+.kv dt{font-family:var(--ac-mono);font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ac-text-secondary);padding-top:3px;white-space:nowrap}
+.kv dd{margin:0;color:var(--ac-text-primary);font-size:14px;overflow-wrap:anywhere}
+.kv dd.em{color:var(--ac-text-brand);font-weight:600}
+
+/* connector */
+.conn{position:relative;height:64px;margin-left:25px;width:20px}
+.conn svg{position:absolute;left:0;top:0;width:20px;height:64px;overflow:visible}
+.conn .track{stroke:var(--ac-border);stroke-width:1;stroke-dasharray:3 4}
+.conn .draw{stroke:var(--ac-surface-brand);stroke-width:2;stroke-dasharray:64;stroke-dashoffset:64;transition:stroke-dashoffset 1.6s cubic-bezier(.65,0,.35,1)}
+.conn.on .draw{stroke-dashoffset:0}
+.conn .pulse{fill:var(--ac-surface-brand);opacity:0}
+.conn.on .pulse{animation:travel 1.6s cubic-bezier(.65,0,.35,1) forwards}
+@keyframes travel{0%{opacity:1;transform:translateY(0)}90%{opacity:1}100%{opacity:0;transform:translateY(64px)}}
+.conn .tag{position:absolute;left:30px;top:50%;transform:translateY(-50%);font-family:var(--ac-mono);font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ac-text-secondary);white-space:nowrap;opacity:0;transition:opacity .6s .8s}
+.conn.on .tag{opacity:1}
+
+/* call steps */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.steps li{display:flex;align-items:center;gap:12px;padding:8px 0;color:var(--ac-text-secondary);opacity:.45;transition:opacity .3s}
+.steps li.done,.steps li.now{opacity:1;color:var(--ac-text-primary)}
+.steps .dot{width:22px;height:22px;flex:none;border-radius:50%;border:.5px solid var(--ac-border);display:grid;place-items:center;background:var(--ac-surface-primary)}
+.steps li.done .dot{background:var(--ac-surface-brand);border-color:var(--ac-surface-brand);color:var(--ac-text-invert)}
+.steps li.now .dot{border:1.5px solid var(--ac-surface-brand)}
+.steps li.now .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--ac-surface-brand);animation:blink 1.2s infinite}
+.steps li.fail .dot{background:var(--ac-live);border-color:var(--ac-live);color:#fff}
+.steps li.fail{opacity:1;color:var(--ac-live)}
+.steps .lab{flex:1;font-size:14px}
+.steps .meta{font-family:var(--ac-mono);font-size:11px;font-weight:600;color:var(--ac-text-secondary)}
+@keyframes blink{50%{opacity:.25}}
+.live{display:none;align-items:center;gap:7px;color:var(--ac-live);font-family:var(--ac-mono);font-weight:600;font-size:11px;letter-spacing:.06em}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--ac-live);animation:blink 1s infinite}
+.node.is-live .live{display:inline-flex}
+.wave{display:none;align-items:center;gap:3px;height:28px;margin:10px 0 2px;padding:0 4px}
+.node.is-live .wave{display:flex}
+.wave span{width:3px;border-radius:2px;background:var(--ac-surface-brand);height:6px;animation:wv 1s ease-in-out infinite}
+@keyframes wv{50%{height:26px}}
+.note{margin:10px 0 0;font-size:13px;color:var(--ac-text-secondary)}
+.note.err{color:var(--ac-live)}
+
+.summary{margin:14px 0 0;padding:12px 14px;background:var(--ac-surface-secondary);border-radius:10px;font-size:14px;color:var(--ac-text-primary);line-height:1.5}
+.summary .ac-eyebrow{display:block;color:var(--ac-text-secondary);font-size:10px;margin-bottom:4px}
+.verdict{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;font-family:var(--ac-mono);font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.badge.yes{background:#E1F2EC;color:#00684F}
+.badge.no{background:#F6E5E3;color:#9C3A33}
+.verdict p{margin:0;font-size:14px;color:var(--ac-text-primary)}
+.route{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding-top:12px;border-top:.5px solid var(--ac-border);font-size:14px;color:var(--ac-text-primary)}
+.route svg{flex:none;color:var(--ac-text-brand);margin-top:1px}
+
+@media (max-width:600px){
+  .ac-head{padding:18px 16px 20px}
+  .ac-head h2{font-size:24px}
+  .ac-body{padding:20px 16px 32px}
+  .ac-foot{padding:12px 16px}
+  .ac-foot small{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="announce">Acme Automate now connects to 300+ apps.<a href="#products">See what's new</a></div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="logo" href="#" aria-label="Acme home">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2B3FE0"/><path d="M16 6 26 26h-5l-5-10.5L11 26H6z" fill="#fff"/><circle cx="16" cy="22.5" r="2.2" fill="#FFB627"/></svg>
+      acme
+    </a>
+    <ul>
+      <li><a href="#products">Products</a></li>
+      <li><a href="#products">Solutions</a></li>
+      <li><a href="#customers">Customers</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Resources</a></li>
+    </ul>
+    <div class="right">
+      <a class="signin" href="#">Sign in</a>
+      <a class="btn btn-primary" href="#talk">Talk to sales</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="pill"><b>New</b> Acme Insights: forecasts you can actually trust</span>
+      <h1>Close more deals with less busywork.</h1>
+      <p class="lede">Acme brings your CRM, analytics, support desk and automations into one workspace, so your team spends its day selling instead of updating spreadsheets.</p>
+      <ul class="checks">
+        <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B3FE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>Live in two weeks, with a dedicated onboarding lead</li>
+        <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B3FE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>Free migration from Salesforce, HubSpot or Pipedrive</li>
+        <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B3FE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>UK and EU data residency, SOC 2 Type II</li>
+      </ul>
+      <div class="proof">
+        <div class="avatars" aria-hidden="true">
+          <span style="background:#2B3FE0">PN</span><span style="background:#E0566B">TK</span><span style="background:#13A07A">JM</span><span style="background:#F29A2E">AL</span>
+        </div>
+        <div>
+          <div class="stars" aria-label="4.8 out of 5 stars">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .6-5.4 4.7 1.7 7.2L12 17.8 5.7 21.5l1.7-7.2L2 9.6 9 9z"/></svg><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .6-5.4 4.7 1.7 7.2L12 17.8 5.7 21.5l1.7-7.2L2 9.6 9 9z"/></svg><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .6-5.4 4.7 1.7 7.2L12 17.8 5.7 21.5l1.7-7.2L2 9.6 9 9z"/></svg><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .6-5.4 4.7 1.7 7.2L12 17.8 5.7 21.5l1.7-7.2L2 9.6 9 9z"/></svg><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 7 7 .6-5.4 4.7 1.7 7.2L12 17.8 5.7 21.5l1.7-7.2L2 9.6 9 9z"/></svg>
+          </div>
+          4.8 on G2 from 2,140 reviews
+        </div>
+      </div>
+    </div>
+
+    <form class="form-card" id="talk" novalidate autocomplete="on">
+      <h2>Talk to sales</h2>
+      <p class="sub">Tell us a little about your team. <strong>A product specialist will call you within a minute.</strong></p>
+      <div class="grid2">
+        <div class="field"><label for="first_name">First name</label><input id="first_name" name="first_name" required placeholder="Jade" autocomplete="given-name"></div>
+        <div class="field"><label for="last_name">Last name</label><input id="last_name" name="last_name" required placeholder="Evans" autocomplete="family-name"></div>
+      </div>
+      <div class="field"><label for="email">Work email</label><input id="email" name="email" type="email" required placeholder="jade@company.com" autocomplete="email"></div>
+      <div class="field">
+        <label for="phone">Phone</label>
+        <div class="phone">
+          <select id="cc" name="cc" aria-label="Country code">
+            <option value="+44" selected>UK +44</option>
+            <option value="+353">IE +353</option>
+            <option value="+33">FR +33</option>
+            <option value="+49">DE +49</option>
+            <option value="+34">ES +34</option>
+            <option value="+31">NL +31</option>
+            <option value="+32">BE +32</option>
+            <option value="+39">IT +39</option>
+            <option value="+1">US +1</option>
+          </select>
+          <input id="phone" name="phone" type="tel" required placeholder="7700 900123" autocomplete="tel-national" inputmode="tel">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="company">Company</label><input id="company" name="company" required placeholder="Northwind Logistics" autocomplete="organization"></div>
+        <div class="field"><label for="company_size">Company size</label>
+          <select id="company_size" name="company_size" required>
+            <option value="" disabled selected>Select</option>
+            <option>1-10</option><option>11-50</option><option>51-200</option><option>201-1,000</option><option>1,000+</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl" id="prod-lbl">What are you interested in?</span>
+        <div class="chips" role="group" aria-labelledby="prod-lbl">
+          <label class="chip"><input type="checkbox" name="products" value="Acme CRM" checked><span>CRM</span></label>
+          <label class="chip"><input type="checkbox" name="products" value="Acme Insights"><span>Insights</span></label>
+          <label class="chip"><input type="checkbox" name="products" value="Acme Support Desk"><span>Support Desk</span></label>
+          <label class="chip"><input type="checkbox" name="products" value="Acme Automate"><span>Automate</span></label>
+        </div>
+      </div>
+      <label class="consent"><input type="checkbox" id="consent" required> I agree that Acme can call me about this request. Calls may be handled by an AI assistant and recorded.</label>
+      <button class="btn btn-primary" type="submit" id="submit">Request a call</button>
+      <div class="form-msg" id="form-msg" role="alert"></div>
+      <p class="fine">We never share your details. Read our privacy notice.</p>
+    </form>
+  </div>
+</section>
+
+<section class="logos" id="customers">
+  <div class="wrap">
+    <p>Trusted by 6,000+ revenue teams across Europe</p>
+    <div class="names" aria-hidden="true">
+      <span>Northwind</span><span>Globex</span><span>Initech</span><span>UMBRELLA</span><span>hooli</span><span>Vandelay</span>
+    </div>
+  </div>
+</section>
+
+<section class="products" id="products">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>One platform for the whole revenue team</h2>
+      <p>Start with the product you need today. Add the rest when you're ready, with no extra integrations.</p>
+    </div>
+    <div class="bento">
+      <article class="tile crm">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg></div>
+        <h3>Acme CRM</h3>
+        <p>A pipeline your reps will actually keep up to date. Activity logs itself, follow-ups write themselves.</p>
+        <div class="kanban" aria-hidden="true">
+          <div class="col"><h4>Discovery <span>12</span></h4>
+            <div class="deal"><b>Globex</b><small><span>£18k</span><span>Tom</span></small></div>
+            <div class="deal"><b>Initech</b><small><span>£7.5k</span><span>Aisha</span></small></div>
+          </div>
+          <div class="col"><h4>Proposal <span>6</span></h4>
+            <div class="deal hot"><b>Northwind</b><small><span>£42k</span><span>Priya</span></small></div>
+            <div class="deal"><b>Vandelay</b><small><span>£11k</span><span>Tom</span></small></div>
+          </div>
+          <div class="col"><h4>Closing <span>3</span></h4>
+            <div class="deal"><b>Hooli</b><small><span>£64k</span><span>Jade</span></small></div>
+          </div>
+        </div>
+      </article>
+      <article class="tile t2">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></div>
+        <h3>Acme Insights</h3>
+        <p>Forecasts built from real activity, not gut feel. Spot slipping deals a month earlier.</p>
+      </article>
+      <article class="tile t3">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></div>
+        <h3>Acme Support Desk</h3>
+        <p>Every ticket next to the deal it came from, so sales and support stop working blind.</p>
+      </article>
+      <article class="tile t4">
+        <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
+        <div>
+          <h3>Acme Automate</h3>
+          <p>Route leads, chase renewals and sync your tools with no-code workflows across 300+ apps.</p>
+        </div>
+        <a class="btn btn-ghost" href="#talk">Book a walkthrough</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="quote">
+  <div class="wrap">
+    <div class="box">
+      <blockquote>“We replaced four tools with Acme in a month. Our reps got back a full day a week, and our forecast is finally something the board believes.”
+        <cite><b>Priya Nair</b>, VP Sales, Northwind Logistics</cite>
+      </blockquote>
+      <div class="stat"><strong>31%</strong><span>faster pipeline velocity in the first quarter</span></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a class="logo" href="#"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2B3FE0"/><path d="M16 6 26 26h-5l-5-10.5L11 26H6z" fill="#fff"/><circle cx="16" cy="22.5" r="2.2" fill="#FFB627"/></svg>acme</a>
+      <p style="max-width:22em;margin:0">The revenue platform for growing teams. London, Dublin and Paris.</p>
+    </div>
+    <div><h5>Product</h5><ul><li><a href="#">CRM</a></li><li><a href="#">Insights</a></li><li><a href="#">Support Desk</a></li><li><a href="#">Automate</a></li></ul></div>
+    <div><h5>Company</h5><ul><li><a href="#">About</a></li><li><a href="#">Careers</a></li><li><a href="#">Press</a></li><li><a href="#">Contact</a></li></ul></div>
+    <div><h5>Resources</h5><ul><li><a href="#">Blog</a></li><li><a href="#">Guides</a></li><li><a href="#">Status</a></li><li><a href="#">Security</a></li></ul></div>
+    <div class="legal"><span>© 2026 Acme Corp Ltd. A fictional company for demonstration purposes.</span><span>Privacy · Terms · Cookies</span></div>
+  </div>
+</footer>
+
+<!-- ============ Aircall behind-the-scenes panel ============ -->
+<div class="ac-scrim" id="ac-scrim"></div>
+<aside class="ac-panel" id="ac-panel" aria-label="Behind the scenes with Aircall" aria-hidden="true">
+  <div class="ac-head">
+    <div class="row">
+      <div class="ac-wordmark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>
+        aircall.ai
+      </div>
+      <button class="ac-close" id="ac-close" aria-label="Close panel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="ac-eyebrow">Behind the scenes</div>
+    <h2>Speed-to-lead, handled by an AI Voice Agent</h2>
+    <div class="ac-mode ac-eyebrow" id="ac-mode" hidden><i></i><span>Simulation mode</span></div>
+  </div>
+
+  <div class="ac-body">
+    <div class="flow" id="flow">
+
+      <!-- 1. Lead created -->
+      <div class="node" id="n1">
+        <div class="nh">
+          <div class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></div>
+          <div class="t"><div class="ac-eyebrow">Trigger · Acme website form</div><h3>Lead created</h3></div>
+          <div class="when" id="t1"></div>
+        </div>
+        <div class="nb"><dl class="kv" id="lead-kv"></dl></div>
+      </div>
+
+      <div class="conn" id="c1"><svg viewBox="0 0 20 64"><line class="track" x1="10" y1="0" x2="10" y2="64"/><line class="draw" x1="10" y1="0" x2="10" y2="64"/><circle class="pulse" cx="10" cy="0" r="4"/></svg><span class="tag">POST /v1/outbound-calls</span></div>
+
+      <!-- 2. Outbound AI Voice Agent call -->
+      <div class="node" id="n2">
+        <div class="nh">
+          <div class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div class="t"><div class="ac-eyebrow">Aircall · Outbound AI Voice Agent</div><h3>Qualification call</h3></div>
+          <div class="when"><span class="live"><i></i>LIVE</span><span id="t2"></span></div>
+        </div>
+        <div class="nb">
+          <ul class="steps" id="steps">
+            <li data-s="queued"><span class="dot"></span><span class="lab">Call requested from Aircall</span><span class="meta"></span></li>
+            <li data-s="dialing"><span class="dot"></span><span class="lab" id="dial-lab">Dialing the lead</span><span class="meta"></span></li>
+            <li data-s="in_call"><span class="dot"></span><span class="lab">AI Voice Agent qualifying the lead</span><span class="meta" id="timer"></span></li>
+            <li data-s="call_ended"><span class="dot"></span><span class="lab">Call ended</span><span class="meta" id="dur"></span></li>
+          </ul>
+          <div class="wave" aria-hidden="true"></div>
+          <p class="note" id="call-note"></p>
+        </div>
+      </div>
+
+      <div class="conn" id="c2"><svg viewBox="0 0 20 64"><line class="track" x1="10" y1="0" x2="10" y2="64"/><line class="draw" x1="10" y1="0" x2="10" y2="64"/><circle class="pulse" cx="10" cy="0" r="4"/></svg><span class="tag">submit_qualification action</span></div>
+
+      <!-- 3. Qualification captured -->
+      <div class="node" id="n3">
+        <div class="nh">
+          <div class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg></div>
+          <div class="t"><div class="ac-eyebrow">Collected during the call</div><h3>Qualification captured</h3></div>
+          <div class="when" id="t3"></div>
+        </div>
+        <div class="nb">
+          <dl class="kv" id="res-kv"></dl>
+          <div class="summary" id="res-summary" hidden><span class="ac-eyebrow">Call summary</span><span id="res-summary-text"></span></div>
+        </div>
+      </div>
+
+      <div class="conn" id="c3"><svg viewBox="0 0 20 64"><line class="track" x1="10" y1="0" x2="10" y2="64"/><line class="draw" x1="10" y1="0" x2="10" y2="64"/><circle class="pulse" cx="10" cy="0" r="4"/></svg><span class="tag">Routing rule</span></div>
+
+      <!-- 4. Outcome -->
+      <div class="node" id="n4">
+        <div class="nh">
+          <div class="glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg></div>
+          <div class="t"><div class="ac-eyebrow">Outcome</div><h3 id="out-title">Lead routed</h3></div>
+        </div>
+        <div class="nb">
+          <div class="verdict"><span class="badge" id="out-badge"></span><p id="out-reason"></p></div>
+          <div class="route" id="out-route"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ac-foot">
+    <small>Powered by Aircall AI Voice Agent</small>
+    <div style="display:flex;gap:8px">
+      <button class="ac-btn" id="ac-hide">Hide</button>
+      <button class="ac-btn primary" id="ac-reset">Run another demo</button>
+    </div>
+  </div>
+</aside>
+
+<script>
+/* ===================== CONFIG ===================== */
+// Set to the deployed Cloudflare Worker URL. Leave empty to run in simulation mode.
+const WORKER_URL = "";
+const POLL_MS = 1500;
+const GIVE_UP_MS = 6 * 60 * 1000;
+
+/* passcode comes from the AE's link (?key=...) and is remembered on this browser */
+const params = new URLSearchParams(location.search);
+let PASSCODE = params.get("key") || "";
+try {
+  if (PASSCODE) localStorage.setItem("acme_demo_key", PASSCODE);
+  else PASSCODE = localStorage.getItem("acme_demo_key") || "";
+} catch (_) {}
+if (params.has("key")) { params.delete("key"); history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash); }
+const SIMULATE = params.get("demo") === "1" || !WORKER_URL || !PASSCODE;
+
+/* ===================== HELPERS ===================== */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clock = (d = new Date()) => d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+const mmss = (sec) => `${String(Math.floor(sec / 60)).padStart(1, "0")}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+function maskPhone(p) { return p.length > 7 ? p.slice(0, p.length - 6) + " ••• " + p.slice(-3) : p; }
+function setKV(el, rows) {
+  el.innerHTML = rows.filter(([, v]) => v).map(([k, v, em]) => `<dt>${esc(k)}</dt><dd${em ? ' class="em"' : ""}>${esc(v)}</dd>`).join("");
+}
+document.querySelector(".wave").innerHTML = Array.from({ length: 34 }, (_, i) => `<span style="animation-delay:${(i * 73) % 900}ms"></span>`).join("");
+
+/* ===================== PANEL ===================== */
+const body = document.body;
+function openPanel() { body.classList.add("ac-open"); $("ac-panel").setAttribute("aria-hidden", "false"); }
+function closePanel() { body.classList.remove("ac-open"); $("ac-panel").setAttribute("aria-hidden", "true"); }
+$("ac-close").onclick = closePanel;
+$("ac-hide").onclick = closePanel;
+$("ac-scrim").onclick = closePanel;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePanel(); });
+
+let run = 0; // increments to cancel an in-flight demo
+function resetFlow() {
+  run++;
+  ["n1", "n2", "n3", "n4"].forEach((id) => $(id).classList.remove("show", "active", "is-live"));
+  ["c1", "c2", "c3"].forEach((id) => $(id).classList.remove("on"));
+  document.querySelectorAll("#steps li").forEach((li) => { li.className = ""; li.querySelector(".meta").textContent = ""; });
+  ["t1", "t2", "t3", "call-note", "timer", "dur"].forEach((id) => ($(id).textContent = ""));
+  $("call-note").className = "note";
+  $("res-kv").innerHTML = ""; $("res-summary").hidden = true;
+  clearInterval(timerHandle);
+}
+$("ac-reset").onclick = () => {
+  resetFlow(); closePanel();
+  $("submit").disabled = false; $("submit").textContent = "Request a call";
+  document.getElementById("talk").scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => $("first_name").focus(), 400);
+};
+
+async function reveal(nodeId) {
+  const el = $(nodeId);
+  el.classList.add("show");
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "nearest" }), 120);
+  await wait(900);
+}
+async function connect(connId) { $(connId).classList.add("on"); await wait(1650); }
+
+/* call step state machine */
+const ORDER = ["queued", "dialing", "in_call", "call_ended"];
+let timerHandle = null;
+function setCallStep(state) {
+  const idx = ORDER.indexOf(state);
+  document.querySelectorAll("#steps li").forEach((li) => {
+    const i = ORDER.indexOf(li.dataset.s);
+    if (li.classList.contains("fail")) return;
+    li.classList.toggle("done", i < idx || (state === "call_ended" && i === idx));
+    li.classList.toggle("now", i === idx && state !== "call_ended");
+    if ((i < idx || (state === "call_ended" && i === idx)) && !li.querySelector(".meta").textContent && li.dataset.s !== "in_call" && li.dataset.s !== "call_ended") li.querySelector(".meta").textContent = clock();
+  });
+  $("n2").classList.toggle("is-live", state === "in_call");
+}
+function startTimer(fromMs) {
+  clearInterval(timerHandle);
+  const tick = () => ($("timer").textContent = mmss((Date.now() - fromMs) / 1000));
+  tick(); timerHandle = setInterval(tick, 500);
+}
+function stopTimer(durationSec) {
+  clearInterval(timerHandle);
+  if (durationSec != null) { $("dur").textContent = mmss(durationSec); $("timer").textContent = mmss(durationSec); }
+}
+
+/* ===================== RENDER ===================== */
+const NEXT_STEP_COPY = {
+  specialist_callback: (r, lead) => `Acme sales gets a hot lead in the CRM${r.preferred_callback ? `, callback requested: ${r.preferred_callback}` : ""}.`,
+  send_resources: (r, lead) => `Lead added to the nurture sequence. Resources sent to ${lead.email || "the lead"}.`,
+  not_interested: () => "Lead marked as not interested. No further outreach.",
+};
+function renderLead(lead) {
+  setKV($("lead-kv"), [
+    ["Name", `${lead.first_name} ${lead.last_name}`.trim()],
+    ["Company", lead.company],
+    ["Email", lead.email],
+    ["Phone", maskPhone(lead.phone)],
+    ["Team size", lead.company_size],
+    ["Interest", (lead.products || []).join(", ")],
+  ]);
+  $("dial-lab").textContent = `Dialing ${maskPhone(lead.phone)}`;
+}
+function renderResult(r, lead) {
+  setKV($("res-kv"), [
+    ["Team size", r.team_size],
+    ["Current setup", r.current_setup],
+    ["Main pain", r.main_pain],
+    ["Timeline", r.timeline],
+    ["Decision role", r.decision_role],
+    ["Next step", r.preferred_callback ? `Callback ${r.preferred_callback}` : "", true],
+  ]);
+  if (r.summary) { $("res-summary-text").textContent = r.summary; $("res-summary").hidden = false; }
+  const q = !!r.qualified;
+  $("out-title").textContent = q ? "Qualified, sent to sales" : "Not qualified, sent to nurture";
+  $("out-badge").className = "badge " + (q ? "yes" : "no");
+  $("out-badge").textContent = q ? "Qualified" : "Not qualified";
+  $("out-reason").textContent = r.qualification_reason || "";
+  const copy = (NEXT_STEP_COPY[r.next_step] || NEXT_STEP_COPY[q ? "specialist_callback" : "send_resources"])(r, lead);
+  $("out-route").innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>${esc(copy)}</span>`;
+}
+
+/* ===================== DEMO FLOW ===================== */
+async function startDemo(lead) {
+  resetFlow();
+  const myRun = run;
+  const alive = () => myRun === run;
+  $("ac-mode").hidden = !SIMULATE;
+  openPanel();
+  await wait(1400); // let the panel finish its slide before the first node pops
+
+  renderLead(lead);
+  $("t1").textContent = clock();
+  await reveal("n1");
+  if (!alive()) return;
+
+  // kick off the real trigger in parallel with the connector animation
+  const triggerP = SIMULATE ? Promise.resolve({ ok: true, data: { lead_id: "sim" } }) : triggerCall(lead);
+  await connect("c1");
+  if (!alive()) return;
+  $("n2").classList.add("active");
+  $("t2").textContent = "";
+  await reveal("n2");
+  setCallStep("queued");
+
+  const trig = await triggerP;
+  if (!alive()) return;
+  if (!trig.ok) return failCall(trig.message);
+  setCallStep("dialing");
+
+  const result = SIMULATE ? await simulateCall(lead, alive) : await pollCall(trig.data.lead_id, alive);
+  if (!alive() || !result) return;
+
+  // call finished with data
+  setCallStep("call_ended");
+  $("n2").classList.remove("active", "is-live");
+  await connect("c2");
+  if (!alive()) return;
+  renderResult(result, lead);
+  $("t3").textContent = clock();
+  $("n3").classList.add("active");
+  await reveal("n3");
+  await wait(900);
+  $("n3").classList.remove("active");
+  await connect("c3");
+  if (!alive()) return;
+  await reveal("n4");
+  $("n4").scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function failCall(message) {
+  const li = document.querySelector('#steps li[data-s="dialing"]');
+  li.className = "fail"; li.querySelector(".dot").textContent = "!";
+  $("n2").classList.remove("active", "is-live");
+  $("call-note").className = "note err";
+  $("call-note").textContent = message;
+  stopTimer();
+}
+
+async function triggerCall(lead) {
+  try {
+    const resp = await fetch(WORKER_URL.replace(/\/$/, "") + "/trigger", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...lead, passcode: PASSCODE }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (resp.ok) return { ok: true, data };
+    const msgs = {
+      bad_passcode: "The demo link is missing a valid key. Ask Paul for the AE link.",
+      bad_phone: "That phone number doesn't look right. Use a full mobile number.",
+      country_not_allowed: "Calls to that country aren't enabled for this demo.",
+      rate_limited: `This number was just called. Try again in ${data.retry_in || 60}s.`,
+      aircall_error: `Aircall didn't accept the call (HTTP ${data.status}). ${data.detail?.message || ""}`,
+    };
+    return { ok: false, message: msgs[data.error] || `The call couldn't be started (HTTP ${resp.status}).` };
+  } catch (e) {
+    return { ok: false, message: "Couldn't reach the demo backend. Check your connection and try again." };
+  }
+}
+
+async function pollCall(leadId, alive) {
+  const started = Date.now();
+  let lastStatus = "dialing";
+  let liveSince = null;
+  while (alive()) {
+    await wait(POLL_MS);
+    if (!alive()) return null;
+    let s;
+    try {
+      const r = await fetch(`${WORKER_URL.replace(/\/$/, "")}/status/${leadId}`, { cache: "no-store" });
+      s = await r.json();
+    } catch (_) { continue; }
+
+    if (s.status === "trigger_failed") { failCall(`Aircall rejected the call. ${s.error?.message || ""}`); return null; }
+
+    if ((s.status === "in_call" || s.answered_at) && !liveSince) {
+      liveSince = s.answered_at || Date.now();
+      setCallStep("in_call"); startTimer(liveSince);
+    }
+    if (s.status === "call_ended" && lastStatus !== "call_ended") {
+      stopTimer(s.duration);
+      if (s.missed) { setCallStep("call_ended"); $("n2").classList.remove("active"); $("call-note").textContent = "No answer. The lead stays in the queue for a retry."; return null; }
+      $("call-note").textContent = "Waiting for the agent's results…";
+    }
+    if (s.result) {
+      if (liveSince) stopTimer(s.duration ?? Math.round((Date.now() - liveSince) / 1000));
+      return s.result;
+    }
+    // Without the Aircall webhook we can't see "answered"; show a neutral in-progress state after a short ring.
+    if (!liveSince && s.status === "dialing" && Date.now() - started > 12000) {
+      $("call-note").textContent = "Call in progress. Results appear here as soon as the agent wraps up.";
+    }
+    if (s.status === "call_ended" && Date.now() - (s.ended_at || Date.now()) > 45000) {
+      $("call-note").textContent = "The call ended before the agent collected the qualification (voicemail or early hang-up).";
+      return null;
+    }
+    lastStatus = s.status;
+    if (Date.now() - started > GIVE_UP_MS) { $("call-note").textContent = "No result received from the call."; return null; }
+  }
+  return null;
+}
+
+async function simulateCall(lead, alive) {
+  await wait(2600); if (!alive()) return null;
+  const t0 = Date.now();
+  setCallStep("in_call"); startTimer(t0);
+  await wait(16000); if (!alive()) return null;
+  stopTimer(Math.round((Date.now() - t0) / 1000) + 74); // pretend a ~1.5 min call
+  const small = lead.company_size === "1-10";
+  const prod = (lead.products || [])[0] || "Acme CRM";
+  return small
+    ? {
+        qualified: false,
+        qualification_reason: "Small team with no decision timeline yet.",
+        team_size: "4 people",
+        current_setup: "Spreadsheets and a shared inbox",
+        main_pain: "Losing track of follow-ups",
+        timeline: "Just researching, maybe next year",
+        decision_role: "Founder, sole decision maker",
+        next_step: "send_resources",
+        preferred_callback: "",
+        summary: `${lead.first_name} runs a 4-person team at ${lead.company} and is exploring ${prod} for later. Sent a starter guide and pricing.`,
+      }
+    : {
+        qualified: true,
+        qualification_reason: "Team of 25+, deciding this quarter, clear pain with their current tool.",
+        team_size: lead.company_size === "11-50" ? "25 sales reps" : "60 reps across 3 teams",
+        current_setup: "HubSpot Starter plus spreadsheets",
+        main_pain: "Forecasts are manual and pipeline data is out of date",
+        timeline: "Decision within 6 weeks",
+        decision_role: "Head of Sales, signs off with the CFO",
+        next_step: "specialist_callback",
+        preferred_callback: "Tuesday morning",
+        summary: `${lead.first_name} at ${lead.company} wants to replace HubSpot Starter with ${prod} this quarter. Main driver is unreliable forecasting. Wants a specialist call Tuesday morning.`,
+      };
+}
+
+/* ===================== FORM ===================== */
+$("talk").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const msg = $("form-msg");
+  msg.textContent = "";
+  const required = ["first_name", "last_name", "email", "phone", "company", "company_size"];
+  for (const id of required) {
+    const el = $(id);
+    if (!el.value.trim() || !el.checkValidity()) { msg.textContent = `Please check the ${el.labels[0].textContent.toLowerCase()} field.`; el.focus(); return; }
+  }
+  if (!$("consent").checked) { msg.textContent = "Please agree to be called so we can reach you."; $("consent").focus(); return; }
+
+  let national = $("phone").value.replace(/[^\d]/g, "").replace(/^0+/, "");
+  const phone = $("cc").value + national;
+  if (!/^\+\d{9,15}$/.test(phone)) { msg.textContent = "Please enter a full phone number."; $("phone").focus(); return; }
+
+  const lead = {
+    first_name: $("first_name").value.trim(),
+    last_name: $("last_name").value.trim(),
+    email: $("email").value.trim(),
+    company: $("company").value.trim(),
+    company_size: $("company_size").value,
+    products: [...f.querySelectorAll('input[name="products"]:checked')].map((i) => i.value),
+    phone,
+  };
+  $("submit").disabled = true;
+  $("submit").textContent = "Request sent";
+  startDemo(lead);
+});
+</script>
+</body>
+</html>
