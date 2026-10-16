@@ -770,11 +770,16 @@ async function pollCall(leadId, alive) {
   let lastStatus = "dialing";
   let liveSince = null;
   while (alive()) {
-    await wait(POLL_MS);
+    await waitOrVisible(POLL_MS);
     if (!alive()) return null;
     let s;
     try {
-      const r = await fetch(`${WORKER_URL.replace(/\/$/, "")}/status/${leadId}`, { cache: "no-store" });
+      // A stalled request must never freeze the loop: abort after 5s and try again.
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 5000);
+      const r = await fetch(`${WORKER_URL.replace(/\/$/, "")}/status/${leadId}?t=${Date.now()}`, { cache: "no-store", signal: ctrl.signal });
+      clearTimeout(t);
+      if (!r.ok) continue;
       s = await r.json();
     } catch (_) { continue; }
 
@@ -812,6 +817,16 @@ async function pollCall(leadId, alive) {
     if (Date.now() - started > GIVE_UP_MS) { $("n2").classList.remove("active", "is-live"); stopTimer(); $("call-note").textContent = "No result received from the call."; return null; }
   }
   return null;
+}
+
+// Resolves after `ms`, or immediately when the tab comes back to the foreground (background tabs get throttled).
+function waitOrVisible(ms) {
+  return new Promise((resolve) => {
+    const done = () => { clearTimeout(t); document.removeEventListener("visibilitychange", onVis); resolve(); };
+    const onVis = () => { if (document.visibilityState === "visible") done(); };
+    const t = setTimeout(done, ms);
+    document.addEventListener("visibilitychange", onVis);
+  });
 }
 
 async function simulateCall(lead, alive) {
