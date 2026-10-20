@@ -341,7 +341,7 @@ button,input,select{font:inherit}
           <div class="dial" id="dial-live">
             <span class="eyebrow">Call Acme support</span>
             <div class="num"><a id="dial-num" href="#"></a></div>
-            <p>Call from <strong id="from-num"></strong>. The flow on the left lights up as soon as the agent picks up.</p>
+            <p>Call from <strong id="from-num"></strong>. The flow lights up when the agent starts on your first question.</p>
           </div>
           <div class="dial" id="dial-sim" hidden>
             <span class="eyebrow">Simulation</span>
@@ -380,13 +380,13 @@ import { KB } from "./kb.js";
 /* ===================== CONFIG ===================== */
 const WORKER_URL = "https://acme-aiva-demo.b00784180.workers.dev";
 // The Aircall number the FAQ agent answers on. Leave empty until it's assigned (live mode stays off).
-const INBOUND_NUMBER = "";
+const INBOUND_NUMBER = "+12064663177";
 const USE_CASE = "faq";
 const POLL_WAIT_MS = 1500;   // while waiting for the call
 const POLL_LIVE_MS = 600;    // during the call, so the reel starts the moment the agent searches
 const GIVE_UP_MS = 15 * 60 * 1000;
 const END_FALLBACK_MS = 20 * 1000;            // no call.ended webhook? close a resolved call this long after the outcome
-const END_FALLBACK_TRANSFER_MS = 3 * 60 * 1000; // ...and a transferred one, giving the team time on the call
+const END_FALLBACK_TRANSFER_MS = 15 * 1000;     // ...and a transferred one (no webhook, so the team's part isn't tracked live)
 
 /* key comes from the AE link (?key=...) and is shared with the outbound demo on this browser */
 const params = new URLSearchParams(location.search);
@@ -815,6 +815,7 @@ function fmtIntl(e164) {
   const d = e164.replace(/\D/g, "");
   if (/^\+44(20|23|24|28|29)/.test(e164) && d.length === 12) return `+44 ${d.slice(2, 4)} ${d.slice(4, 8)} ${d.slice(8)}`;
   if (e164.startsWith("+44") && d.length === 12) return `+44 ${d.slice(2, 6)} ${d.slice(6)}`;
+  if (e164.startsWith("+1") && d.length === 11) return `+1 ${d.slice(1, 4)} ${d.slice(4, 7)} ${d.slice(7)}`;
   return e164;
 }
 
