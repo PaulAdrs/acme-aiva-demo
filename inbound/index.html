@@ -24,6 +24,7 @@
   --tint-sky:#CFE6F7;
   --tint-rose:#F7D3D6;
   --glow:#00B386;
+  --human:#D98E2B;
   /* Aircall 2026 brand tokens (reasoning panel) */
   --surface-primary:#FFFEFA;
   --surface-secondary:#F7F6F0;
@@ -75,6 +76,20 @@ button,input,select{font:inherit}
 .live-wire{fill:none;stroke:var(--glow);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;filter:drop-shadow(0 0 5px rgba(0,179,134,.75))}
 .live-wire.go{transition:stroke-dashoffset 1.1s var(--ease);stroke-dashoffset:0}
 .dimmed{filter:opacity(.36) grayscale(.5);transition:filter 1.4s}
+.live-wire.human{stroke:var(--human);filter:drop-shadow(0 0 5px rgba(217,142,43,.6))}
+.badge{position:absolute;transform:translate(-50%,-50%) scale(.6);opacity:0;display:flex;align-items:center;gap:6px;border-radius:999px;padding:5px 13px;font-size:13px;font-weight:600;white-space:nowrap;z-index:2}
+.badge.in{animation:pop .8s var(--pop) forwards}
+.badge.ai{background:var(--surface-brand);color:#fff;box-shadow:0 0 0 5px rgba(0,179,134,.18),0 0 22px rgba(0,179,134,.45)}
+.badge.hand{background:#fff;color:var(--slate);border:1.5px solid var(--glow);box-shadow:var(--card-shadow)}
+.badge.hand svg{color:var(--surface-brand)}
+.human::after{border-color:var(--human);animation:breatheH 2.4s ease-in-out infinite}
+@keyframes breatheH{0%,100%{box-shadow:0 0 0 0 rgba(217,142,43,0),0 0 10px rgba(217,142,43,.25)}50%{box-shadow:0 0 0 9px rgba(217,142,43,.16),0 0 30px rgba(217,142,43,.55)}}
+.card.human-solid::after{border-color:var(--human);box-shadow:0 0 0 4px rgba(217,142,43,.14)}
+.card.human .state,.card.human-solid .state{opacity:1;color:#B86E12}
+.ring.human{border-color:var(--human);box-shadow:0 0 0 4px rgba(217,142,43,.18)}
+.legend{position:absolute;left:20px;bottom:16px;display:flex;gap:18px;background:rgba(255,255,255,.85);border:.5px solid var(--border);border-radius:10px;padding:8px 14px;font-size:13px;color:var(--slate);z-index:2}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:22px;height:4px;border-radius:2px}
 .wire.dimmed{filter:none;opacity:.3}
 
 .node{position:absolute;opacity:0;transform:translate(-50%,-50%) scale(.6);transition:box-shadow .5s,border-color .5s,background .5s,opacity .8s}
@@ -270,6 +285,7 @@ button,input,select{font:inherit}
         </svg>
         <div id="nodes"></div>
       </div>
+      <div class="legend" aria-hidden="true"><span><i style="background:var(--glow)"></i>AI Voice Agent</span><span><i style="background:var(--human)"></i>Your team</span></div>
     </section>
 
     <aside class="panel" aria-live="polite">
@@ -369,7 +385,8 @@ const USE_CASE = "faq";
 const POLL_WAIT_MS = 1500;   // while waiting for the call
 const POLL_LIVE_MS = 600;    // during the call, so the reel starts the moment the agent searches
 const GIVE_UP_MS = 15 * 60 * 1000;
-const END_FALLBACK_MS = 45 * 1000; // no call.ended webhook? close the story this long after the outcome
+const END_FALLBACK_MS = 20 * 1000;            // no call.ended webhook? close a resolved call this long after the outcome
+const END_FALLBACK_TRANSFER_MS = 3 * 60 * 1000; // ...and a transferred one, giving the team time on the call
 
 /* key comes from the AE link (?key=...) and is shared with the outbound demo on this browser */
 const params = new URLSearchParams(location.search);
@@ -406,7 +423,7 @@ const svg = (name, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="
 
 /* ===================== FLOW LAYOUT ===================== */
 // The agent's transfer branches sit below it, like in Smartflows. When the AI resolves the call itself,
-// there is no branch: the call goes straight from the agent to "Call ends" down the centre line.
+// the call ends at the agent; only transfers continue down to the team and then "Call ends".
 const CX = 550;
 const BRANCHES = [
   { key: "billing",   x: 130, label: "Billing & refunds",  title: "Billing team",    sub: "Ring for 30 sec", tint: "var(--tint-amber)" },
@@ -422,7 +439,6 @@ const down = (x) => `M${CX} 216 V${Y.bus} H${x + (x < CX ? R : -R)} Q${x} ${Y.bu
 const up = (x) => `M${x} 500 V${Y.merge - R} Q${x} ${Y.merge} ${x + (x < CX ? R : -R)} ${Y.merge} H${CX} V650`;
 const WIRES = {
   in: `M${CX} 76 V132`,
-  center: `M${CX} 216 V650`,
   ...Object.fromEntries(BRANCHES.flatMap((b) => [["d_" + b.key, down(b.x)], ["u_" + b.key, up(b.x)]])),
 };
 
@@ -470,7 +486,7 @@ async function introFlow(alive) {
   await step(() => on("n-in"), 500);
   await step(() => { on("r1"); wireOn("in"); }, 700);
   await step(() => on("n-agent"), 700);
-  await step(() => { on("r2"); wireOn("center"); BRANCHES.forEach((b) => wireOn("d_" + b.key)); }, 1100);
+  await step(() => { on("r2"); BRANCHES.forEach((b) => wireOn("d_" + b.key)); }, 1100);
   for (const b of BRANCHES) await step(() => { on("l-" + b.key); on("r3_" + b.key); }, 180);
   for (const b of BRANCHES) await step(() => on("n-" + b.key), 220);
   await step(() => { BRANCHES.forEach((b) => { wireOn("u_" + b.key); on("r4_" + b.key); }); }, 1100);
@@ -478,14 +494,14 @@ async function introFlow(alive) {
   $("n-in").classList.add("waiting");
 }
 
-// Green current flowing along a wire.
-function flow(key, ms = 1100) {
+// Current flowing along a wire: green for the AI's part, amber for the team's.
+function flow(key, ms = 1100, kind = "") {
   const base = $("w-" + key);
   if (!base) return Promise.resolve();
   const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
   p.setAttribute("d", base.getAttribute("d"));
   p.setAttribute("pathLength", "1");
-  p.setAttribute("class", "live-wire");
+  p.setAttribute("class", "live-wire" + (kind ? " " + kind : ""));
   p.id = "lw-" + key;
   p.style.transitionDuration = ms + "ms";
   $("live").appendChild(p);
@@ -634,33 +650,53 @@ async function onOutcome(ev, alive) {
       ${ev.summary ? `<div class="note"><span class="eyebrow">Handover note for the team</span><p>${esc(ev.summary)}</p></div>` : ""}</div>`);
   }
   await wait(1000); if (!alive()) return;
-  // flow: agent settles, current runs down the chosen branch, other branches dim
   const agent = $("n-agent");
-  agent.classList.remove("breathe");
+  agent.classList.remove("breathe", "fast");
   agent.classList.add("solid");
-  $("agent-state").textContent = b.key === "resolved" ? "Resolved" : "Routing";
-  BRANCHES.filter((x) => x.key !== b.key).forEach((x) => ["l-", "n-", "r3_", "r4_"].forEach((p) => $(p + x.key).classList.add("dimmed")));
-  BRANCHES.filter((x) => x.key !== b.key).forEach((x) => { $("w-d_" + x.key).classList.add("dimmed"); $("w-u_" + x.key).classList.add("dimmed"); });
-  if (b.key !== "resolved") $("w-center").classList.add("dimmed");
-  lit("r2");
+  // every branch the call did not take fades out
+  BRANCHES.filter((x) => x.key !== b.key).forEach((x) => {
+    ["l-", "n-", "r3_", "r4_"].forEach((p) => $(p + x.key).classList.add("dimmed"));
+    $("w-d_" + x.key).classList.add("dimmed"); $("w-u_" + x.key).classList.add("dimmed");
+  });
+
   if (b.key === "resolved") {
-    // no branch: straight from the agent to the end of the call
-    await flow("center", 2600);
-    if (!alive()) return;
-    lit("r5");
+    // The AI resolved it: the call ends at the agent. Nothing flows further down.
+    state.aiEnd = Date.now();
+    $("agent-state").textContent = "Resolved";
+    ["r2", "r5", "n-out"].forEach((id) => $(id).classList.add("dimmed"));
+    badge("b-end", CX, Y.r2 + 6, "ai", `${svg("check", 'width="15" height="15"')}Resolved by AI, call ends here`);
+    sys("check", "The AI resolved the call. No transfer, so the call ends here.", ev.at);
   } else {
+    // Transfer: the AI's part ends at the handover; the team finishes the call with the note.
+    $("agent-state").textContent = "Transferring";
+    lit("r2");
     await flow("d_" + b.key, 2200);
     if (!alive()) return;
     lit("l-" + b.key); lit("r3_" + b.key);
+    state.aiEnd = Date.now();
+    $("agent-state").textContent = "Handed over";
+    badge("b-hand", b.x + (b.x < CX ? 98 : -98), Y.r3, "hand", `${svg("route", 'width="14" height="14"')}AI hands over here`);
+    await wait(700); if (!alive()) return;
     const team = $("n-" + b.key);
-    team.classList.add("breathe");
-    $("s-" + b.key).textContent = "Ringing";
-    sys("route", `Transferring to <strong>${esc(b.title)}</strong> with the handover note`, ev.at);
+    team.classList.add("human");
+    $("s-" + b.key).textContent = "Taking over";
+    sys("route", `The AI's part of the call ends here. <strong>${esc(b.title)}</strong> takes over with the handover note.`, ev.at);
   }
   // without a call.ended webhook, close the story after a while
   clearTimeout(state.endTimer);
   const myRun = run;
-  state.endTimer = setTimeout(() => { if (myRun === run && !state.ended) enqueue({ type: "call_ended", at: Date.now(), synthetic: true }); }, END_FALLBACK_MS);
+  state.endTimer = setTimeout(() => { if (myRun === run && !state.ended) enqueue({ type: "call_ended", at: Date.now(), synthetic: true }); },
+    b.key === "resolved" ? END_FALLBACK_MS : END_FALLBACK_TRANSFER_MS);
+}
+
+function badge(id, x, y, kind, html) {
+  $(id) && $(id).remove();
+  const el = document.createElement("div");
+  el.id = id; el.className = "badge " + kind;
+  el.style.left = x + "px"; el.style.top = y + "px";
+  el.innerHTML = html;
+  $("nodes").appendChild(el);
+  requestAnimationFrame(() => el.classList.add("in"));
 }
 
 async function onEnded(ev, alive) {
@@ -669,30 +705,29 @@ async function onEnded(ev, alive) {
   clearTimeout(state.endTimer);
   $("typing").hidden = true;
   const key = state.outcome;
-  if (key && key !== "resolved") {
-    const team = $("n-" + key);
-    team.classList.remove("breathe"); team.classList.add("solid");
-    $("s-" + key).textContent = "Connected";
-  }
-  $("n-agent").classList.remove("breathe");
-  if (key && key !== "resolved") {
-    lit("r4_" + key);
-    await flow("u_" + key, 1800);
-    if (!alive()) return;
-  }
-  lit("r5");
-  $("n-out").classList.add("done");
-  stopTimer();
-  sys("phoneOff", key && key !== "resolved" ? "AI part of the call ended, caller is with the team" : "Call ended", ev.at);
-  await wait(1200); if (!alive()) return;
-  const dur = mmss((ev.at || Date.now()) - t0);
   const b = key ? BR[key] : null;
-  const headline = !b ? "Call ended before a decision" : b.key === "resolved" ? "Resolved by the AI, no agent needed" : `Routed to ${b.title}, with context`;
+  $("n-agent").classList.remove("breathe", "fast");
+  if (b && key !== "resolved") {
+    // the team's part of the call, drawn in the team colour
+    const team = $("n-" + key);
+    team.classList.remove("human"); team.classList.add("human-solid");
+    $("s-" + key).textContent = "Resolved by team";
+    $("r4_" + key).classList.add("human");
+    await flow("u_" + key, 1800, "human");
+    if (!alive()) return;
+    $("r5").classList.add("human");
+    $("n-out").classList.add("done");
+  }
+  stopTimer();
+  sys("phoneOff", !b ? "The caller hung up" : key === "resolved" ? "Call ended by the AI" : `${esc(b.title)} finished the call`, ev.at);
+  await wait(1200); if (!alive()) return;
+  const aiTime = mmss((state.aiEnd || ev.at || Date.now()) - t0);
+  const headline = !b ? "Call ended before a decision" : key === "resolved" ? "Resolved by the AI, no agent needed" : `AI handed over to ${b.title}, with context`;
   const line = !b ? "The caller hung up before the agent reached an outcome." :
-    b.key === "resolved" ? "Every question was answered from the knowledge base. Your team never picked up the phone." :
-    "The team gets the caller's issue and what the agent already tried, so nobody asks the caller to start again.";
+    key === "resolved" ? "Every question was answered from the knowledge base. Your team never picked up the phone." :
+    `The AI handled the first ${aiTime}, then passed the caller and the handover note to the ${b.title.toLowerCase()}. The team resolved it without asking the caller to start again.`;
   add(`<div class="outcome"><span class="eyebrow">Outcome</span><h3>${esc(headline)}</h3><p>${esc(line)}</p>
-    <div class="stats"><div><strong>${dur}</strong>AI handling time</div><div><strong>${state.kbCount}</strong>knowledge base ${state.kbCount === 1 ? "search" : "searches"}</div><div><strong>${b && b.key === "resolved" ? "0" : b ? "1" : "0"}</strong>transfers</div></div>
+    <div class="stats"><div><strong>${aiTime}</strong>handled by AI</div><div><strong>${state.kbCount}</strong>knowledge base ${state.kbCount === 1 ? "search" : "searches"}</div><div><strong>${b && key !== "resolved" ? "1" : "0"}</strong>${b && key !== "resolved" ? "handover" : "handovers"}</div></div>
     <button class="btn ghost again" id="again">Run another demo</button></div>`);
   $("again").onclick = () => reset(true);
 }
@@ -723,7 +758,7 @@ const SCENARIOS = {
     [17000, { type: "outcome", outcome: "billing",
       reasoning: "The caller confirmed both charges have settled and wants the duplicate refunded. I can't issue refunds, and the article says billing handles this, so I'm routing to the billing team.",
       summary: "Pro plan customer charged twice for October (two settled charges of 468 pounds). Already explained pending authorisations; both charges have cleared. Wants the duplicate refunded." }],
-    [11000, { type: "call_ended" }],
+    [18000, { type: "call_ended" }],
   ],
 };
 
