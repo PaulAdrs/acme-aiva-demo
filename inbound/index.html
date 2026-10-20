@@ -225,6 +225,38 @@ button,input,select{font:inherit}
 .route .note{margin-top:10px;padding-top:10px;border-top:.5px solid var(--border)}
 .route .note p{font-size:14px}
 
+.order{padding:0;overflow:hidden}
+.order .top{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:.5px solid var(--border);color:var(--text-secondary)}
+.order .top .shop{width:18px;height:18px;flex:none}
+.order .top .status{margin-left:auto}
+.order .top .status.hit{color:var(--text-brand)}
+.order .top .status.miss{color:var(--live)}
+.order .spin{border-color:#D5E8B5;border-top-color:#5E8E3E}
+.order .skel{padding:14px 16px;display:grid;gap:9px}
+.order .skel i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#EEF0EA,#F7F8F4,#EEF0EA);background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+.order .body{padding:14px 16px 4px}
+.order .ohead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.order .onum{font-family:var(--serif);font-size:26px;line-height:1;color:var(--text-primary)}
+.order .items{font-size:13px;color:var(--text-secondary);margin-top:4px}
+.verified{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--text-brand);background:#DDF4EC;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.verified svg{width:12px;height:12px}
+.tl{list-style:none;margin:16px 0 6px;padding:0;position:relative}
+.tl li{position:relative;padding:0 0 14px 30px;font-size:14px;color:#9AABA7;transition:color .5s}
+.tl li::before{content:"";position:absolute;left:5px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid #CAD3D1;background:#fff;transition:border-color .5s,background .5s,box-shadow .5s;z-index:1}
+.tl li::after{content:"";position:absolute;left:11px;top:16px;bottom:-4px;width:2px;background:#E1E6E5}
+.tl li:last-child::after{display:none}
+.tl li .bar{position:absolute;left:11px;top:16px;bottom:-4px;width:2px;background:var(--glow);transform:scaleY(0);transform-origin:top;transition:transform .55s var(--ease);z-index:1}
+.tl li.done{color:var(--text-primary)}
+.tl li.done::before{border-color:var(--glow);background:var(--glow)}
+.tl li.done .bar{transform:scaleY(1)}
+.tl li.now{color:var(--text-primary);font-weight:600}
+.tl li.now::before{border-color:var(--glow);background:#fff;box-shadow:0 0 0 4px rgba(0,179,134,.18)}
+.tl li.stop::before{border-color:var(--live);background:var(--live)}
+.tl small{display:block;font-weight:400;font-size:12.5px;color:var(--text-secondary);margin-top:1px}
+.order .ship{display:flex;flex-wrap:wrap;gap:6px 16px;padding:10px 16px;border-top:.5px solid var(--border);font-size:13px;color:var(--text-secondary)}
+.order .ship b{color:var(--text-primary);font-weight:600}
+.order .miss-msg{padding:14px 16px;font-size:14px;color:var(--text-primary)}
 .typing{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:13px;margin-top:4px}
 .typing b{display:inline-flex;gap:3px}
 .typing b i{width:5px;height:5px;border-radius:50%;background:var(--text-secondary);animation:dots 1.2s infinite}
@@ -271,8 +303,8 @@ button,input,select{font:inherit}
     <span class="sep"></span>
     <span class="what">Inbound AI Voice Agent, live</span>
     <nav class="tabs" role="tablist" aria-label="Use case">
-      <button class="tab" role="tab" aria-selected="true">FAQ + routing</button>
-      <button class="tab" role="tab" aria-selected="false" disabled>WISMO (Shopify)<small>soon</small></button>
+      <button class="tab" role="tab" aria-selected="true" data-uc="faq">FAQ + routing</button>
+      <button class="tab" role="tab" aria-selected="false" data-uc="wismo">WISMO (Shopify)</button>
       <button class="tab" role="tab" aria-selected="false" disabled>Speed to lead<small>soon</small></button>
     </nav>
   </header>
@@ -295,14 +327,14 @@ button,input,select{font:inherit}
           <span class="eyebrow">Behind the call</span>
           <span class="chip eyebrow" id="chip"><i></i><span id="chip-text">Ready</span></span>
         </div>
-        <h1>FAQ deflection and intent routing</h1>
+        <h1 id="uc-title">FAQ deflection and intent routing</h1>
         <span class="chip eyebrow sim" id="sim-badge" hidden><i></i>Simulation mode</span>
       </div>
 
       <div class="pbody" id="pbody">
         <!-- 1. setup -->
         <div id="v-setup">
-          <p class="lead">Call Acme's support line and watch the AI Voice Agent search its knowledge base, answer, or route you to the right team. Every decision shows up here with the agent's reasoning.</p>
+          <p class="lead" id="uc-lead"></p>
           <form id="setup-form" novalidate>
             <label class="field">
               <span>The mobile you'll call from</span>
@@ -340,7 +372,7 @@ button,input,select{font:inherit}
         <!-- 2. waiting for the call -->
         <div id="v-wait" hidden>
           <div class="dial" id="dial-live">
-            <span class="eyebrow">Call Acme support</span>
+            <span class="eyebrow" id="dial-label">Call Acme support</span>
             <div class="num"><a id="dial-num" href="#"></a></div>
             <p>Call from <strong id="from-num"></strong>. The flow lights up when the agent starts on your first question.</p>
           </div>
@@ -349,18 +381,10 @@ button,input,select{font:inherit}
             <p style="margin-top:8px">No phone needed. Pick a scenario and the flow plays out with scripted events, exactly as a live call would.</p>
           </div>
           <div class="waiting-row" id="waiting-row"><i></i><span>Waiting for your call</span></div>
-          <div class="sim-actions" id="sim-actions" hidden>
-            <button class="btn primary" data-scenario="resolved">Play: answered by the AI</button>
-            <button class="btn ghost" data-scenario="routed">Play: routed to billing</button>
-          </div>
+          <div class="sim-actions" id="sim-actions" hidden></div>
           <div class="try">
             <span class="eyebrow">Things to ask</span>
-            <ul>
-              <li>"How do I reset my password?"</li>
-              <li>"Can I export my contacts?"</li>
-              <li>"I've been charged twice and want a refund"</li>
-              <li>"The app keeps crashing" or "I want to talk to sales"</li>
-            </ul>
+            <ul id="try-list"></ul>
           </div>
           <p class="hint"><button class="linkish" id="change">Change number</button></p>
         </div>
@@ -380,9 +404,6 @@ import { KB } from "./kb.js";
 
 /* ===================== CONFIG ===================== */
 const WORKER_URL = "https://acme-aiva-demo.b00784180.workers.dev";
-// The Aircall number the FAQ agent answers on. Leave empty until it's assigned (live mode stays off).
-const INBOUND_NUMBER = "+12064663177";
-const USE_CASE = "faq";
 const POLL_WAIT_MS = 1500;   // while waiting for the call
 const POLL_LIVE_MS = 600;    // during the call, so the reel starts the moment the agent searches
 const GIVE_UP_MS = 15 * 60 * 1000;
@@ -398,7 +419,9 @@ try {
   else PASSCODE = localStorage.getItem("acme_demo_key") || "";
 } catch (_) {}
 if (params.has("key")) { params.delete("key"); history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash); }
-const SIMULATE = params.get("demo") === "1" || !WORKER_URL || !PASSCODE || !INBOUND_NUMBER;
+const FORCE_SIM = params.get("demo") === "1" || !WORKER_URL || !PASSCODE;
+let USE_CASE = params.get("uc") === "wismo" ? "wismo" : "faq";
+let SIMULATE = true, INBOUND_NUMBER = "";
 
 /* ===================== HELPERS ===================== */
 const $ = (id) => document.getElementById(id);
@@ -419,6 +442,9 @@ const I = {
   trend: '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
   heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
   mic: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/>',
+  truck: '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
   route: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
 };
 const svg = (name, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${I[name]}</svg>`;
@@ -427,25 +453,64 @@ const svg = (name, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="
 // The agent's transfer branches sit below it, like in Smartflows. When the AI resolves the call itself,
 // the call ends at the agent; only transfers continue down to the team and then "Call ends".
 const CX = 550;
-const BRANCHES = [
-  { key: "billing",   x: 130, label: "Billing & refunds",  title: "Billing team",    sub: "Ring for 30 sec", tint: "var(--tint-amber)" },
-  { key: "technical", x: 370, label: "Technical issue",    title: "Tech support",    sub: "Ring for 30 sec", tint: "var(--tint-sky)" },
-  { key: "sales",     x: 730, label: "Sales enquiry",      title: "Sales team",      sub: "Ring for 30 sec", tint: "var(--tint-violet)" },
-  { key: "care",      x: 970, label: "Asks for a person",  title: "Customer care",   sub: "Ring for 30 sec", tint: "var(--tint-rose)" },
-];
-const BR = Object.fromEntries(BRANCHES.map((b) => [b.key, b]));
-BR.resolved = { key: "resolved", title: "Resolved by AI" };
+const UC = {
+  faq: {
+    title: "FAQ deflection and intent routing",
+    lead: "Call Acme's support line and watch the AI Voice Agent search its knowledge base, answer, or route you to the right team. Every decision shows up here with the agent's reasoning.",
+    number: "+12064663177", // the Aircall number the FAQ agent answers on
+    dial: "Call Acme support",
+    agentSub: "Acme support assistant",
+    work: "knowledge base search", resolvedLine: "Every question was answered from the knowledge base. Your team never picked up the phone.",
+    tries: ['"How do I reset my password?"', '"Can I export my contacts?"', '"I\'ve been charged twice and want a refund"', '"The app keeps crashing" or "I want to talk to sales"'],
+    sims: [["resolved", "Play: answered by the AI"], ["routed", "Play: routed to billing"]],
+    branches: [
+      { key: "billing",   x: 130, label: "Billing & refunds",  title: "Billing team",    sub: "Ring for 30 sec", tint: "var(--tint-amber)" },
+      { key: "technical", x: 370, label: "Technical issue",    title: "Tech support",    sub: "Ring for 30 sec", tint: "var(--tint-sky)" },
+      { key: "sales",     x: 730, label: "Sales enquiry",      title: "Sales team",      sub: "Ring for 30 sec", tint: "var(--tint-violet)" },
+      { key: "care",      x: 970, label: "Asks for a person",  title: "Customer care",   sub: "Ring for 30 sec", tint: "var(--tint-rose)" },
+    ],
+  },
+  wismo: {
+    title: "Where is my order? Live from Shopify",
+    lead: "Call Acme's store line and ask where your order is. The AI Voice Agent verifies you, looks the order up in Shopify, tells you where it is, or routes you to the right team. Every step shows up here with the agent's reasoning.",
+    number: "", // the Aircall number the WISMO agent answers on; empty keeps this tab in simulation
+    dial: "Call the Acme store",
+    agentSub: "Acme order assistant",
+    work: "order lookup", resolvedLine: "The caller got a live order update straight from Shopify. Your team never picked up the phone.",
+    tries: ['"Where\'s my order? It\'s number 1001."', 'Give the email on the order when asked', '"It says delivered but I never got it"', '"I want to return something"'],
+    sims: [["resolved", "Play: order update by the AI"], ["routed", "Play: missing parcel, routed"]],
+    branches: [
+      { key: "delivery", x: 210, label: "Delivery problem",  title: "Delivery team",  sub: "Ring for 30 sec", tint: "var(--tint-sky)", icon: "truck" },
+      { key: "returns",  x: 550, label: "Return or refund",  title: "Returns team",   sub: "Ring for 30 sec", tint: "var(--tint-amber)", icon: "undo" },
+      { key: "care",     x: 890, label: "Asks for a person", title: "Customer care",  sub: "Ring for 30 sec", tint: "var(--tint-rose)" },
+    ],
+  },
+};
+let BRANCHES = [], BR = {};
+function applyUseCase(key) {
+  USE_CASE = key;
+  const u = UC[key];
+  BRANCHES = u.branches;
+  BR = Object.fromEntries(BRANCHES.map((b) => [b.key, b]));
+  BR.resolved = { key: "resolved", title: "Resolved by AI" };
+  INBOUND_NUMBER = u.number;
+  SIMULATE = FORCE_SIM || !INBOUND_NUMBER;
+  $("uc-title").textContent = u.title;
+  $("uc-lead").textContent = u.lead;
+  $("dial-label").textContent = u.dial;
+  $("try-list").innerHTML = u.tries.map((t) => `<li>${esc(t)}</li>`).join("");
+  $("sim-actions").innerHTML = u.sims.map(([k, label], i) => `<button class="btn ${i ? "ghost" : "primary"}" data-scenario="${k}">${esc(label)}</button>`).join("");
+  $("sim-badge").hidden = !SIMULATE;
+  document.querySelectorAll(".tab[data-uc]").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.uc === key)));
+}
 const Y = { in: 48, r1: 104, agent: 174, r2: 244, bus: 290, label: 340, r3: 392, team: 460, r4: 528, merge: 576, r5: 622, out: 678 };
 const R = 16;
-const down = (x) => `M${CX} 216 V${Y.bus} H${x + (x < CX ? R : -R)} Q${x} ${Y.bus} ${x} ${Y.bus + R} V420`;
-const up = (x) => `M${x} 500 V${Y.merge - R} Q${x} ${Y.merge} ${x + (x < CX ? R : -R)} ${Y.merge} H${CX} V650`;
-const WIRES = {
-  in: `M${CX} 76 V132`,
-  ...Object.fromEntries(BRANCHES.flatMap((b) => [["d_" + b.key, down(b.x)], ["u_" + b.key, up(b.x)]])),
-};
+const down = (x) => x === CX ? `M${CX} 216 V420` : `M${CX} 216 V${Y.bus} H${x + (x < CX ? R : -R)} Q${x} ${Y.bus} ${x} ${Y.bus + R} V420`;
+const up = (x) => x === CX ? `M${CX} 500 V650` : `M${x} 500 V${Y.merge - R} Q${x} ${Y.merge} ${x + (x < CX ? R : -R)} ${Y.merge} H${CX} V650`;
 
 function buildFlow() {
   const wires = $("wires"), nodes = $("nodes");
+  const WIRES = { in: `M${CX} 76 V132`, ...Object.fromEntries(BRANCHES.flatMap((b) => [["d_" + b.key, down(b.x)], ["u_" + b.key, up(b.x)]])) };
   wires.innerHTML = Object.entries(WIRES).map(([k, d]) =>
     `<path class="wire" id="w-${k}" d="${d}" pathLength="1"/>`).join("");
   $("live").innerHTML = "";
@@ -454,13 +519,13 @@ function buildFlow() {
     <div class="node pill" id="n-in" style="left:${CX}px;top:${Y.in}px">${svg("phone")}Call comes in</div>
     <div class="node card" id="n-agent" style="left:${CX}px;top:${Y.agent}px;width:320px">
       <span class="ico" style="background:var(--tint-green)">${svg("agent")}</span>
-      <div><b>AI Voice Agent</b><small>Acme support assistant</small></div>
+      <div><b>AI Voice Agent</b><small>${UC[USE_CASE].agentSub}</small></div>
       <span class="state" id="agent-state">On the call</span>
     </div>
     ${BRANCHES.map((b) => `
       <div class="label" id="l-${b.key}" style="left:${b.x}px;top:${Y.label}px">${b.label}</div>
       <div class="node card sm" id="n-${b.key}" style="left:${b.x}px;top:${Y.team}px;width:196px">
-        <span class="ico" style="background:${b.tint}">${svg("users")}</span>
+        <span class="ico" style="background:${b.tint}">${svg(b.icon || "users")}</span>
         <div><b>${b.title}</b><small>${b.sub}</small></div>
         <span class="state" id="s-${b.key}"></span>
       </div>`).join("")}
@@ -583,6 +648,65 @@ async function kbReel(matchId, alive) {
   await wait(1800);
 }
 
+// Shopify lookup: a loading card, then the order with a delivery timeline that fills up to where the parcel is.
+const SHOP = '<svg class="shop" viewBox="0 0 24 24" aria-hidden="true"><path fill="#95BF47" d="M15.3 3.2c-.1 0-1.9.1-1.9.1s-1.3-1.2-1.4-1.4c-.1-.1-.4-.1-.5 0l-.7.2C10.4 1 9.8.5 9 .5 7.3.5 6.4 2.6 6.1 3.7l-1.6.5c-.5.2-.5.2-.6.6L2.5 18.4 13.4 20.4l5.9-1.3S15.4 3.3 15.3 3.2z"/><path fill="#5E8E3E" d="M15.1 3.3l-1.7 17.1 5.9-1.3S15.4 3.3 15.3 3.2z"/><path fill="#fff" d="M10.2 7.4l-.7 2.1s-.6-.3-1.4-.3c-1.1 0-1.2.7-1.2.9 0 1 2.5 1.3 2.5 3.6 0 1.8-1.1 2.9-2.7 2.9-1.9 0-2.8-1.2-2.8-1.2l.5-1.7s1 .9 1.8.9c.5 0 .8-.4.8-.8 0-1.3-2.1-1.4-2.1-3.5 0-1.8 1.3-3.5 3.8-3.5 1 0 1.5.3 1.5.3z"/></svg>';
+const STAGES = [["ordered", "Order placed"], ["unfulfilled", "Being prepared"], ["in_transit", "On its way"], ["out_for_delivery", "Out for delivery"], ["delivered", "Delivered"]];
+
+async function orderCard(ev, alive) {
+  const el = add(`<div class="box order">
+      <div class="top">${SHOP}<span class="eyebrow">Shopify order lookup</span><span class="status eyebrow"><span class="spin"></span>Order ${esc(ev.order_number ? "#" + ev.order_number : "")}</span></div>
+      <div class="skel"><i style="width:45%"></i><i style="width:80%"></i><i style="width:65%"></i></div>
+    </div>`);
+  await wait(2200); if (!alive()) return;
+  const box = el.querySelector(".order"), status = el.querySelector(".status");
+  el.querySelector(".skel").remove();
+  if (ev.stage === "not_found") {
+    status.className = "status eyebrow miss"; status.textContent = "No match";
+    box.insertAdjacentHTML("beforeend", `<div class="miss-msg">No order matches that number and email, so the agent shares nothing and asks the caller to check the details.</div>`);
+    return;
+  }
+  status.className = "status eyebrow hit"; status.textContent = "Order found";
+  const idx = ev.stage === "cancelled" ? 0 : Math.max(1, STAGES.findIndex(([k]) => k === ev.stage));
+  box.insertAdjacentHTML("beforeend", `<div class="body">
+      <div class="ohead"><span class="onum">#${esc(ev.order_number || "")}</span><span class="verified">${svg("shield")}Caller verified</span></div>
+      ${ev.items ? `<div class="items">${esc(ev.items)}</div>` : ""}
+      <ol class="tl">${(ev.stage === "cancelled" ? [STAGES[0], ["cancelled", "Cancelled"]] : STAGES).map(([k, label], i) =>
+        `<li data-i="${i}"><span class="bar"></span>${label}${i === 0 && ev.order_date ? `<small>${esc(ev.order_date)}</small>` : ""}${i === idx && i > 0 && ev.last_update ? `<small>${esc(ev.last_update)}</small>` : ""}</li>`).join("")}</ol>
+    </div>
+    ${ev.carrier || ev.tracking_number ? `<div class="ship">${ev.carrier ? `<span>Carrier <b>${esc(ev.carrier)}</b></span>` : ""}${ev.tracking_number ? `<span>Tracking <b>${esc(ev.tracking_number)}</b></span>` : ""}</div>` : ""}
+    ${ev.told_caller ? `<div class="answer"><div><div class="inner"><span class="eyebrow">What the agent told the caller</span><p>${esc(ev.told_caller)}</p></div></div></div>` : ""}`);
+  $("pbody").scrollTop = $("pbody").scrollHeight;
+  // the timeline fills step by step up to where the order is now
+  const steps = [...el.querySelectorAll(".tl li")];
+  for (let i = 0; i < steps.length; i++) {
+    await wait(i ? 520 : 200); if (!alive()) return;
+    if (i < idx) steps[i].classList.add("done");
+    else if (i === idx) { steps[i].classList.add(ev.stage === "cancelled" ? "stop" : ev.stage === "delivered" ? "done" : "now"); break; }
+  }
+  await wait(500); if (!alive()) return;
+  const ans = el.querySelector(".answer");
+  if (ans) ans.classList.add("open");
+  setTimeout(() => { $("pbody").scrollTop = $("pbody").scrollHeight; }, 950);
+  await wait(1600);
+}
+
+async function onOrder(ev, alive) {
+  state.kbCount++;
+  $("typing").hidden = true;
+  if (ev.question) quote(ev.question);
+  await wait(1400); if (!alive()) return;
+  if (ev.reasoning) think(ev.reasoning);
+  await wait(2000); if (!alive()) return;
+  const agent = $("n-agent");
+  $("agent-state").textContent = "Checking Shopify";
+  agent.classList.add("fast");
+  await orderCard(ev, alive);
+  if (!alive()) return;
+  agent.classList.remove("fast");
+  $("agent-state").textContent = "On the call";
+  $("typing").hidden = state.ended;
+}
+
 /* ===================== EVENT RENDERER ===================== */
 // The same renderer plays simulated and live events. Event shapes (from the Worker):
 //   call_created / call_answered / call_ended            {type, at}
@@ -600,6 +724,7 @@ async function handle(ev, alive) {
   if (!state.started && ev.type !== "call_ended") await callStarted(ev.at, alive);
   if (!alive()) return;
   if (ev.type === "kb_search") await onKb(ev, alive);
+  else if (ev.type === "order_lookup") await onOrder(ev, alive);
   else if (ev.type === "outcome") await onOutcome(ev, alive);
   else if (ev.type === "call_ended") await onEnded(ev, alive);
 }
@@ -730,10 +855,10 @@ async function onEnded(ev, alive) {
   const aiTime = mmss((state.aiEnd || ev.at || Date.now()) - t0);
   const headline = !b ? "Call ended before a decision" : key === "resolved" ? "Resolved by the AI, no agent needed" : `AI handed over to ${b.title}, with context`;
   const line = !b ? "The caller hung up before the agent reached an outcome." :
-    key === "resolved" ? "Every question was answered from the knowledge base. Your team never picked up the phone." :
+    key === "resolved" ? UC[USE_CASE].resolvedLine :
     `The AI handled the first ${aiTime}, then passed the caller and the handover note to the ${b.title.toLowerCase()}. The team resolved it without asking the caller to start again.`;
   add(`<div class="outcome"><span class="eyebrow">Outcome</span><h3>${esc(headline)}</h3><p>${esc(line)}</p>
-    <div class="stats"><div><strong>${aiTime}</strong>handled by AI</div><div><strong>${state.kbCount}</strong>knowledge base ${state.kbCount === 1 ? "search" : "searches"}</div><div><strong>${b && key !== "resolved" ? "1" : "0"}</strong>${b && key !== "resolved" ? "handover" : "handovers"}</div></div>
+    <div class="stats"><div><strong>${aiTime}</strong>handled by AI</div><div><strong>${state.kbCount}</strong>${UC[USE_CASE].work}${state.kbCount === 1 ? "" : (USE_CASE === "faq" ? "es" : "s")}</div><div><strong>${b && key !== "resolved" ? "1" : "0"}</strong>${b && key !== "resolved" ? "handover" : "handovers"}</div></div>
     <button class="btn ghost again" id="again">Run another demo</button></div>`);
   $("again").onclick = () => reset(true);
 }
@@ -745,7 +870,7 @@ function enqueue(ev) {
 }
 
 /* ===================== SIMULATION ===================== */
-const SCENARIOS = {
+const SCENARIOS = { faq: {
   resolved: [
     [2500, { type: "call_created" }],
     [9000, { type: "kb_search", question: "I can't log in, how do I reset my password?", match_id: "reset-password",
@@ -766,13 +891,38 @@ const SCENARIOS = {
       summary: "Pro plan customer charged twice for October (two settled charges of 468 pounds). Already explained pending authorisations; both charges have cleared. Wants the duplicate refunded." }],
     [18000, { type: "call_ended" }],
   ],
-};
+}, wismo: {
+  resolved: [
+    [2500, { type: "call_created" }],
+    [11000, { type: "order_lookup", question: "Hi, where's my order? It's number 1001.", order_number: "1001", stage: "in_transit",
+      order_date: "14 October", items: "1 x Linen throw, 2 x Stoneware mug", carrier: "Royal Mail", tracking_number: "RM482915736GB",
+      last_update: "Arrived at Heathrow mail centre, 19 October",
+      told_caller: "Your order's on its way with Royal Mail. It reached the Heathrow mail centre yesterday, so it should be with you in the next day or two.",
+      reasoning: "The order number and email match, and the shipment is in transit with Royal Mail, so I can give the caller a live update myself." }],
+    [16000, { type: "outcome", outcome: "resolved",
+      reasoning: "The caller just wanted to know where the parcel is. They have the update and need nothing else, so no transfer.",
+      summary: "Caller asked about order 1001. In transit with Royal Mail, last scan Heathrow mail centre 19 October. No follow-up needed." }],
+    [8000, { type: "call_ended" }],
+  ],
+  routed: [
+    [2500, { type: "call_created" }],
+    [11000, { type: "order_lookup", question: "My order 1002 says delivered but I haven't got it.", order_number: "1002", stage: "delivered",
+      order_date: "9 October", items: "1 x Oak side table", carrier: "DPD", tracking_number: "15501234567890",
+      last_update: "Delivered, left in safe place, 17 October",
+      told_caller: "Shopify shows order 1002 was delivered by DPD on the 17th of October and left in a safe place.",
+      reasoning: "Order and email match. Tracking says delivered on 17 October, but the caller says it never arrived, so I check the details before routing." }],
+    [16000, { type: "outcome", outcome: "delivery",
+      reasoning: "Marked delivered but the caller doesn't have it. That needs a carrier claim, which only the delivery team can open.",
+      summary: "Order 1002, oak side table, DPD marked delivered to a safe place on 17 October. Caller has checked with neighbours and it isn't there. Needs a missing-parcel claim." }],
+    [18000, { type: "call_ended" }],
+  ],
+} };
 
 async function simulate(name) {
   const myRun = run;
   $("sim-actions").hidden = true;
   $("waiting-row").querySelector("span").textContent = "Simulated call incoming";
-  for (const [delay, ev] of SCENARIOS[name]) {
+  for (const [delay, ev] of SCENARIOS[USE_CASE][name]) {
     await wait(delay);
     if (myRun !== run) return;
     enqueue({ ...ev, at: Date.now() });
@@ -865,6 +1015,15 @@ $("sim-actions").addEventListener("click", (e) => {
   if (b) simulate(b.dataset.scenario);
 });
 $("change").addEventListener("click", () => reset(false));
+document.querySelector(".tabs").addEventListener("click", (e) => {
+  const t = e.target.closest(".tab[data-uc]");
+  if (!t || t.dataset.uc === USE_CASE) return;
+  applyUseCase(t.dataset.uc);
+  const q = new URLSearchParams(location.search);
+  if (t.dataset.uc === "faq") q.delete("uc"); else q.set("uc", t.dataset.uc);
+  history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash);
+  reset(false);
+});
 
 async function reset(keepNumber) {
   run++;
@@ -897,7 +1056,7 @@ async function reset(keepNumber) {
 
 /* boot */
 resetState();
-$("sim-badge").hidden = !SIMULATE;
+applyUseCase(USE_CASE);
 try {
   const saved = JSON.parse(localStorage.getItem("acme_inbound_phone") || "null");
   if (saved) { $("cc").value = saved.cc; $("num").value = saved.num; }
