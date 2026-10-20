@@ -387,6 +387,7 @@ const POLL_LIVE_MS = 600;    // during the call, so the reel starts the moment t
 const GIVE_UP_MS = 15 * 60 * 1000;
 const END_FALLBACK_MS = 20 * 1000;            // no call.ended webhook? close a resolved call this long after the outcome
 const END_FALLBACK_TRANSFER_MS = 15 * 1000;     // ...and a transferred one (no webhook, so the team's part isn't tracked live)
+const END_FALLBACK_WEBHOOK_MS = 10 * 60 * 1000; // with the webhook, call.ended closes it; this is only a safety net
 
 /* key comes from the AE link (?key=...) and is shared with the outbound demo on this browser */
 const params = new URLSearchParams(location.search);
@@ -591,6 +592,10 @@ function resetState() { state = { started: false, ended: false, kbCount: 0, outc
 
 async function handle(ev, alive) {
   if (!alive()) return;
+  if (ev.source === "webhook") state.webhook = true;
+  if (ev.type === "call_answered" || ev.type === "ai_ended") return; // nothing extra to draw
+  if (ev.type === "ai_started" && state.started) return;             // already shown by call.created
+  if (ev.type === "ai_escalated") return;                            // log_outcome already drew the handover
   if (!state.started && ev.type !== "call_ended") await callStarted(ev.at, alive);
   if (!alive()) return;
   if (ev.type === "kb_search") await onKb(ev, alive);
@@ -686,7 +691,7 @@ async function onOutcome(ev, alive) {
   clearTimeout(state.endTimer);
   const myRun = run;
   state.endTimer = setTimeout(() => { if (myRun === run && !state.ended) enqueue({ type: "call_ended", at: Date.now(), synthetic: true }); },
-    b.key === "resolved" ? END_FALLBACK_MS : END_FALLBACK_TRANSFER_MS);
+    b.key === "resolved" ? END_FALLBACK_MS : state.webhook ? END_FALLBACK_WEBHOOK_MS : END_FALLBACK_TRANSFER_MS);
 }
 
 function badge(id, x, y, kind, html) {
