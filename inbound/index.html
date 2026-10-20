@@ -167,9 +167,11 @@ button,input,select{font:inherit}
 @keyframes soft{0%,100%{box-shadow:0 0 0 0 rgba(0,143,109,.4)}50%{box-shadow:0 0 0 8px rgba(0,143,109,0)}}
 .sim-actions{display:grid;gap:10px;margin-bottom:12px}
 .linkish{background:none;border:0;padding:0;color:var(--text-brand);font-weight:600;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-.try{margin:18px 0 0;padding:16px 18px;border-radius:12px;border:.5px solid var(--border)}
-.try ul{margin:8px 0 0;padding-left:18px;font-size:14px;color:var(--text-primary)}
-.try li{margin:3px 0}
+.try{flex:none;padding:12px 24px 14px;border-top:.5px solid var(--border);background:var(--surface-secondary)}
+.try .eyebrow{color:var(--text-secondary)}
+.try ul{margin:6px 0 0;padding-left:18px;font-size:14px;color:var(--text-primary);columns:2;column-gap:22px}
+.try li{margin:2px 0;break-inside:avoid}
+@media (max-width:560px){.try{padding:12px 16px}.try ul{columns:1}}
 
 /* feed */
 .feed{display:flex;flex-direction:column;gap:12px}
@@ -382,10 +384,6 @@ button,input,select{font:inherit}
           </div>
           <div class="waiting-row" id="waiting-row"><i></i><span>Waiting for your call</span></div>
           <div class="sim-actions" id="sim-actions" hidden></div>
-          <div class="try">
-            <span class="eyebrow">Things to ask</span>
-            <ul id="try-list"></ul>
-          </div>
           <p class="hint"><button class="linkish" id="change">Change number</button></p>
         </div>
 
@@ -394,6 +392,10 @@ button,input,select{font:inherit}
           <div class="feed" id="feed"></div>
           <div class="typing" id="typing" hidden><b><i></i><i></i><i></i></b><span>Conversation in progress</span></div>
         </div>
+      </div>
+      <div class="try" id="try" hidden>
+        <span class="eyebrow">Things to ask</span>
+        <ul id="try-list"></ul>
       </div>
     </aside>
   </div>
@@ -581,6 +583,7 @@ const lit = (id) => $(id) && $(id).classList.add("lit");
 /* ===================== PANEL ===================== */
 function show(view) {
   for (const v of ["setup", "wait", "live"]) $("v-" + v).hidden = v !== view;
+  $("try").hidden = view === "setup";
 }
 function chip(text, live = false) {
   $("chip-text").textContent = text;
