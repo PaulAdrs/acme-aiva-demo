@@ -64,6 +64,9 @@ button,input,select{font:inherit}
 .tab[aria-selected="true"]{background:var(--surface-invert);border-color:var(--surface-invert);color:var(--text-invert)}
 .tab[disabled]{cursor:default;color:#8DA09C}
 .tab[disabled] small{font-weight:500;margin-left:4px}
+.cfg{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-brand);text-decoration:none;white-space:nowrap;padding:6px 4px;border-radius:6px}
+.cfg:hover{text-decoration:underline}
+.cfg:focus-visible{outline:2px solid var(--text-brand);outline-offset:2px}
 .main{display:grid;grid-template-columns:1fr 440px;min-height:0}
 
 /* ---------- flow canvas ---------- */
@@ -284,6 +287,7 @@ button,input,select{font:inherit}
   .panel{border-left:0;border-top:.5px solid var(--border)}
   .pbody{overflow:visible}
   .tabs{display:none}
+  .cfg{margin-left:auto}
 }
 @media (max-width:560px){
   .topbar{padding:10px 16px}.topbar .what,.topbar .sep{display:none}
@@ -309,6 +313,7 @@ button,input,select{font:inherit}
       <button class="tab" role="tab" aria-selected="false" data-uc="wismo">WISMO (Shopify)</button>
       <button class="tab" role="tab" aria-selected="false" disabled>Speed to lead<small>soon</small></button>
     </nav>
+    <a class="cfg" id="cfg" href="#" target="_blank" rel="noopener" title="Open this agent's configuration in the Aircall Dashboard">Agent config<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
   </header>
 
   <div class="main">
@@ -462,6 +467,7 @@ const UC = {
     number: "+12064663177", // the Aircall number the FAQ agent answers on
     dial: "Call Acme support",
     agentSub: "Acme support assistant",
+    config: "https://dashboard.aircall.io/ai-voice-agent/01M5C897A9EECPFNV39VBRT5EY/agent_profile",
     work: "knowledge base search", resolvedLine: "Every question was answered from the knowledge base. Your team never picked up the phone.",
     tries: ['"How do I reset my password?"', '"Can I export my contacts?"', '"I\'ve been charged twice and want a refund"', '"The app keeps crashing" or "I want to talk to sales"'],
     sims: [["resolved", "Play: answered by the AI"], ["routed", "Play: routed to billing"]],
@@ -478,6 +484,7 @@ const UC = {
     number: "+17162654363", // the Aircall number the WISMO agent answers on
     dial: "Call the Acme store",
     agentSub: "Acme order assistant",
+    config: "https://dashboard.aircall.io/ai-voice-agent/01M5D0F1DETN4S3DG2377D4V4J/agent_profile",
     work: "order lookup", resolvedLine: "The caller got a live order update straight from Shopify. Your team never picked up the phone.",
     tries: ['"Where\'s my order? It\'s number 11352."', 'Email on the order: jeff.smith@gmail.com', '"It says delivered but I never got it"', '"I want to return something"'],
     sims: [["resolved", "Play: order update by the AI"], ["routed", "Play: missing parcel, routed"]],
@@ -500,6 +507,7 @@ function applyUseCase(key) {
   $("uc-title").textContent = u.title;
   $("uc-lead").textContent = u.lead;
   $("dial-label").textContent = u.dial;
+  $("cfg").href = u.config;
   $("try-list").innerHTML = u.tries.map((t) => `<li>${esc(t)}</li>`).join("");
   $("sim-actions").innerHTML = u.sims.map(([k, label], i) => `<button class="btn ${i ? "ghost" : "primary"}" data-scenario="${k}">${esc(label)}</button>`).join("");
   $("sim-badge").hidden = !SIMULATE;
