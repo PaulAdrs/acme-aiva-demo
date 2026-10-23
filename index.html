@@ -815,8 +815,8 @@ async function pollCall(leadId, alive) {
       if (liveSince) stopTimer(s.duration ?? Math.round((Date.now() - liveSince) / 1000));
       return s.result;
     }
-    // Without the Aircall webhook we can't see "answered"; move to the live step 5s after Aircall accepted the call.
-    if (!liveSince && s.status === "dialing" && Date.now() - started > ASSUME_LIVE_MS) {
+    // If no "answered" signal arrives (the agent-started webhook), move to the live step 5s after Aircall accepted the call.
+    if (!liveSince && (s.status === "dialing" || s.status === "ringing") && Date.now() - started > ASSUME_LIVE_MS) {
       liveSince = Date.now();
       setCallStep("in_call"); startTimer(liveSince);
     }
@@ -826,7 +826,7 @@ async function pollCall(leadId, alive) {
     }
     lastStatus = s.status;
     // No webhook signal and no result after 3 minutes: most likely no answer or voicemail (the agent only reports on real conversations).
-    if (s.status === "dialing" && Date.now() - started > NO_ANSWER_MS) {
+    if ((s.status === "dialing" || s.status === "ringing") && Date.now() - started > NO_ANSWER_MS) {
       stopTimer(); $("n2").classList.remove("active", "is-live");
       $("call-note").textContent = "No result yet. The lead may not have answered, or the call went to voicemail.";
       return null;
