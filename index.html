@@ -785,6 +785,7 @@ async function triggerCall(lead) {
 async function pollCall(leadId, alive) {
   const started = Date.now();
   let lastStatus = "dialing";
+  let endedSeen = 0;
   let liveSince = null;
   while (alive()) {
     await waitOrVisible(POLL_MS);
@@ -809,7 +810,10 @@ async function pollCall(leadId, alive) {
     if (s.status === "call_ended" && lastStatus !== "call_ended") {
       stopTimer(s.duration);
       if (s.missed) { setCallStep("call_ended"); $("n2").classList.remove("active"); $("call-note").textContent = "No answer. The lead stays in the queue for a retry."; return null; }
-      $("call-note").textContent = "Waiting for the agent's results…";
+      // Show the hang-up straight away; a result, if any, was posted during the call and arrives within seconds.
+      endedSeen = Date.now();
+      setCallStep("call_ended"); $("n2").classList.remove("is-live");
+      $("call-note").textContent = "Call ended. Checking for the agent's results…";
     }
     if (s.result) {
       if (liveSince) stopTimer(s.duration ?? Math.round((Date.now() - liveSince) / 1000));
@@ -820,7 +824,8 @@ async function pollCall(leadId, alive) {
       liveSince = Date.now();
       setCallStep("in_call"); startTimer(liveSince);
     }
-    if (s.status === "call_ended" && Date.now() - (s.ended_at || Date.now()) > 45000) {
+    if (s.status === "call_ended" && endedSeen && Date.now() - endedSeen > 10000) {
+      $("n2").classList.remove("active");
       $("call-note").textContent = "The call ended before the agent collected the qualification (voicemail or early hang-up).";
       return null;
     }
