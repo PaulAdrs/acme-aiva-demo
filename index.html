@@ -882,6 +882,27 @@ async function simulateCall(lead, alive) {
 }
 
 /* ===================== FORM ===================== */
+// A pasted international number ("+44 7700 900123", "0044...") sets the country dropdown and keeps only the national part.
+function splitIntl(raw) {
+  const t = raw.trim();
+  if (!/^(\+|00)/.test(t)) return null;
+  const digits = t.replace(/[^\d]/g, "").replace(/^00/, "");
+  const codes = [...new Set([...$("cc").options].map((o) => o.value.slice(1)))].sort((a, b) => b.length - a.length);
+  const code = codes.find((c) => digits.startsWith(c));
+  if (!code) return null;
+  const rest = t.replace(/^(\+|00)\s*/, "").replace(new RegExp("^" + code.split("").join("[\\s().-]*")), "").replace(/^[\s.-]+/, "");
+  return { cc: "+" + code, national: rest.replace(/^\(?0\)?\s*/, "") };
+}
+function applyIntl() {
+  const r = splitIntl($("phone").value);
+  if (!r) return;
+  $("cc").value = r.cc;
+  $("phone").value = r.national;
+}
+// Paste, drop and autofill switch the country at once; typed numbers switch when the field loses focus.
+$("phone").addEventListener("input", (e) => { if (!/^insertText/.test(e.inputType || "")) applyIntl(); });
+$("phone").addEventListener("blur", applyIntl);
+
 $("talk").addEventListener("submit", (e) => {
   e.preventDefault();
   const f = e.target;
@@ -894,6 +915,8 @@ $("talk").addEventListener("submit", (e) => {
   }
   if (!$("consent").checked) { msg.textContent = "Please agree to be called so we can reach you."; $("consent").focus(); return; }
 
+  const intl = splitIntl($("phone").value);
+  if (intl) { $("cc").value = intl.cc; $("phone").value = intl.national; }
   let national = $("phone").value.replace(/[^\d]/g, "").replace(/^0+/, "");
   const phone = $("cc").value + national;
   if (!/^\+\d{9,15}$/.test(phone)) { msg.textContent = "Please enter a full phone number."; $("phone").focus(); return; }
