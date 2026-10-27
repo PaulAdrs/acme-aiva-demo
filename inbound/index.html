@@ -673,7 +673,7 @@ function add(html) {
   return wrap;
 }
 const sys = (icon, text, at) => add(`<div class="sys"><span class="dot">${svg(icon)}</span><span>${text}</span>${stamp(at)}</div>`);
-const quote = (text) => add(`<div class="box quote"><div class="head eyebrow">${svg("mic")}Caller asked</div><p>${esc(text)}</p></div>`);
+const quote = (text) => add(`<div class="box quote"><div class="head eyebrow">${svg("mic")}${USE_CASE === "stl" ? "Caller said" : "Caller asked"}</div><p>${esc(text)}</p></div>`);
 const think = (text) => add(`<div class="box think"><div class="head eyebrow">${svg("agent")}Agent reasoning</div><p>${esc(text)}</p></div>`);
 
 // Slot machine: rows fly up fast and blurred, then decelerate onto the matching article.
