@@ -272,6 +272,8 @@ button,input,select{font:inherit}
 .lrow{display:grid;grid-template-columns:112px 1fr;gap:10px;padding:9px 16px;font-size:14px;border-top:.5px solid #EEF0EA;opacity:.35;transition:opacity .5s}
 .lrow:first-of-type{border-top:0}
 .lrow.in{opacity:1}
+.lrow.new{background:#ECF8F3}
+.lrow{transition:opacity .5s,background 1.2s}
 .lrow .k{color:var(--text-secondary);font-size:13px}
 .lrow .v{color:var(--text-primary);font-weight:600}
 .meter{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:12px 16px 4px;border-top:.5px solid var(--border)}
@@ -773,34 +775,64 @@ async function onOrder(ev, alive) {
 const SCORE_LABEL = { cold: "Cold", warm: "Warm", hot: "Hot" };
 const SCORE_NEXT = { cold: "Not a fit yet: share next steps, no meeting", warm: "Good fit: book a demo with a specialist", hot: "Ready to buy: put through to sales now" };
 
-// The lead card: each answer lands in its row, then the score meter fills to cold, warm or hot.
+const LEAD_ROWS = [["products", "Interested in"], ["team_size", "Team size"], ["timeline", "Timeline"], ["current_tool", "Current tool"]];
+
+// One lead card per call. It moves to the bottom of the feed each time it changes, so it stays in view.
+function leadCard() {
+  if (!state.leadEl) {
+    state.leadEl = add(`<div class="box lead">
+      <div class="top">${svg("target")}<span class="eyebrow">Lead qualification</span><span class="status"><span class="score"></span></span></div>
+      ${LEAD_ROWS.map(([f, k]) => `<div class="lrow" data-f="${f}"><span class="k">${k}</span><span class="v">…</span></div>`).join("")}
+      <div class="meter"><i></i><i></i><i></i></div>
+      <div class="meter-l"><span>Cold</span><span>Warm</span><span>Hot</span></div>
+      <div class="answer"><div><div class="inner"><span class="eyebrow">Next step</span><p></p></div></div></div>
+    </div>`);
+  } else $("feed").appendChild(state.leadEl);
+  requestAnimationFrame(() => { $("pbody").scrollTop = $("pbody").scrollHeight; });
+  return state.leadEl;
+}
+function fillRow(f, value) {
+  const row = state.leadEl.querySelector(`.lrow[data-f="${f}"]`);
+  if (!row || (row.classList.contains("in") && !value)) return false;
+  row.querySelector(".v").textContent = value || "Not given";
+  row.classList.add("in", "new");
+  setTimeout(() => row.classList.remove("new"), 1400);
+  return true;
+}
+
+// One qualification answer, as the caller gives it: what they said, why it matters, then it lands in the card.
+async function onAnswer(ev, alive) {
+  $("typing").hidden = true;
+  if (ev.caller_said) { quote(ev.caller_said); await wait(1300); if (!alive()) return; }
+  if (ev.reasoning) { think(ev.reasoning); await wait(1700); if (!alive()) return; }
+  leadCard();
+  await wait(350); if (!alive()) return;
+  fillRow(ev.field, ev.answer);
+  await wait(1300);
+  $("typing").hidden = state.ended;
+}
+
+// The score: any answers not logged yet land, then the meter fills to cold, warm or hot.
 async function onLead(ev, alive) {
   $("typing").hidden = true;
   state.score = ev.score;
-  if (ev.question) { quote(ev.question); await wait(1400); if (!alive()) return; }
-  if (ev.reasoning) { think(ev.reasoning); await wait(2000); if (!alive()) return; }
-  const rows = [["Interested in", ev.products], ["Team size", ev.team_size], ["Timeline", ev.timeline], ["Current tool", ev.current_tool]];
-  const lvl = ["cold", "warm", "hot"].indexOf(ev.score);
-  const el = add(`<div class="box lead">
-      <div class="top">${svg("target")}<span class="eyebrow">Lead qualification</span><span class="status"><span class="score ${ev.score}">${SCORE_LABEL[ev.score] || ""} lead</span></span></div>
-      ${rows.map(([k]) => `<div class="lrow"><span class="k">${k}</span><span class="v">…</span></div>`).join("")}
-      <div class="meter"><i></i><i></i><i></i></div>
-      <div class="meter-l"><span>Cold</span><span>Warm</span><span>Hot</span></div>
-      <div class="answer"><div><div class="inner"><span class="eyebrow">Next step</span><p>${esc(SCORE_NEXT[ev.score] || "")}</p></div></div></div>
-    </div>`);
+  if (ev.question) { quote(ev.question); await wait(1300); if (!alive()) return; }
+  if (ev.reasoning) { think(ev.reasoning); await wait(1900); if (!alive()) return; }
+  const el = leadCard();
   const agent = $("n-agent");
-  $("agent-state").textContent = "Qualifying";
+  $("agent-state").textContent = "Scoring lead";
   agent.classList.add("fast");
-  const rEls = [...el.querySelectorAll(".lrow")];
-  for (let i = 0; i < rows.length; i++) {
-    await wait(i ? 650 : 400); if (!alive()) return;
-    rEls[i].querySelector(".v").textContent = rows[i][1] || "Not given";
-    rEls[i].classList.add("in");
+  for (const [f] of LEAD_ROWS) {
+    const filled = el.querySelector(`.lrow[data-f="${f}"]`).classList.contains("in");
+    if (!filled || ev[f]) { if (fillRow(f, ev[f])) { await wait(550); if (!alive()) return; } }
   }
+  const lvl = ["cold", "warm", "hot"].indexOf(ev.score);
   const bars = [...el.querySelectorAll(".meter i")];
   for (let i = 0; i <= lvl; i++) { await wait(450); if (!alive()) return; bars[i].classList.add("on", ev.score); }
   await wait(400); if (!alive()) return;
-  el.querySelector(".score").classList.add("in");
+  const sc = el.querySelector(".score");
+  sc.className = "score in " + ev.score; sc.textContent = `${SCORE_LABEL[ev.score] || ""} lead`;
+  el.querySelector(".answer p").textContent = SCORE_NEXT[ev.score] || "";
   await wait(600); if (!alive()) return;
   el.querySelector(".answer").classList.add("open");
   setTimeout(() => { $("pbody").scrollTop = $("pbody").scrollHeight; }, 950);
@@ -857,6 +889,7 @@ async function handle(ev, alive) {
   if (!alive()) return;
   if (ev.type === "kb_search") await onKb(ev, alive);
   else if (ev.type === "order_lookup") await onOrder(ev, alive);
+  else if (ev.type === "lead_answer") await onAnswer(ev, alive);
   else if (ev.type === "lead_update") await onLead(ev, alive);
   else if (ev.type === "availability") await onAvailability(ev, alive);
   else if (ev.type === "outcome") await onOutcome(ev, alive);
@@ -1066,8 +1099,14 @@ const SCENARIOS = { faq: {
 }, stl: {
   booked: [
     [2500, { type: "call_created" }],
-    [20000, { type: "lead_update", score: "warm", question: "Hi, I saw your ad. We're looking at a new CRM for our sales team.",
-      products: "Acme CRM, Acme Automate", team_size: "15 sales reps", timeline: "Next quarter", current_tool: "Spreadsheets",
+    [8000, { type: "lead_answer", field: "products", answer: "Acme CRM", caller_said: "Hi, I saw your ad. We're looking at a new CRM for our sales team.",
+      reasoning: "They want a CRM for a sales team. Next I need the team size, since that drives the fit and who they should speak to." }],
+    [10000, { type: "lead_answer", field: "team_size", answer: "15 sales reps", caller_said: "There are fifteen of us, all reps.",
+      reasoning: "Fifteen seats is a solid team. Timeline decides whether this is a demo or a sales call today, so I'll ask that next." }],
+    [10000, { type: "lead_answer", field: "timeline", answer: "Next quarter", caller_said: "Probably next quarter, we're still looking around.",
+      reasoning: "No urgency this month, so likely a demo rather than a live handover. Asking what they use today to brief the specialist." }],
+    [10000, { type: "lead_update", score: "warm", question: "Just spreadsheets at the moment, and we lose track of follow-ups.",
+      products: "Acme CRM, Acme Automate", current_tool: "Spreadsheets",
       reasoning: "A 15-seat team with a real need, but no decision before next quarter. A good fit for a demo rather than a sales call today." }],
     [14000, { type: "availability", slots: [{ label: "Wednesday 28 October at 10am", day: "Wed 28 Oct", time: "10:00" }, { label: "Wednesday 28 October at 2:30pm", day: "Wed 28 Oct", time: "14:30" }, { label: "Thursday 29 October at 11am", day: "Thu 29 Oct", time: "11:00" }],
       reasoning: "The caller agreed to a demo. Checking which specialist slots are free so I only offer real times." }],
@@ -1078,8 +1117,12 @@ const SCENARIOS = { faq: {
   ],
   hot: [
     [2500, { type: "call_created" }],
-    [20000, { type: "lead_update", score: "hot", question: "We're 60 people on Zendesk and our contract ends this month. Can we move fast?",
-      products: "Acme Support Desk", team_size: "60 agents", timeline: "This month", current_tool: "Zendesk, renewal due",
+    [8000, { type: "lead_answer", field: "products", answer: "Acme Support Desk", caller_said: "We need a new helpdesk for our support team.",
+      reasoning: "A helpdesk need points to Acme Support Desk. I'll ask the team size next to size the opportunity." }],
+    [10000, { type: "lead_answer", field: "team_size", answer: "60 agents", caller_said: "About sixty agents across two sites.",
+      reasoning: "Sixty seats is a large deal. If the timeline is short, this should go to sales right away." }],
+    [10000, { type: "lead_update", score: "hot", question: "We're on Zendesk and our contract ends this month, so we need to move fast.",
+      timeline: "This month", current_tool: "Zendesk, renewal due",
       reasoning: "Sixty seats, a renewal deadline this month and a clear need. This is a hot lead, so a rep should speak to them now, not next week." }],
     [12000, { type: "outcome", outcome: "sales",
       reasoning: "Hot lead with a deadline. Putting them straight through to an account executive while they're on the line.",
