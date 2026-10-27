@@ -850,7 +850,7 @@ async function onAvailability(ev, alive) {
   const slots = Array.isArray(ev.slots) ? ev.slots : [];
   const el = add(`<div class="box cal">
       <div class="top">${svg("calendar")}<span class="eyebrow">Checking the sales calendar</span><span class="status eyebrow"><span class="spin"></span>Specialists</span></div>
-      <div class="slots">${slots.map((x) => `<div class="slot" data-label="${esc(x.label)}"><b>${esc(x.day)}</b>${esc(x.time)}</div>`).join("")}</div>
+      <div class="slots">${slots.map((x) => `<div class="slot" data-label="${esc(x.label)}" data-say="${esc(x.say || x.label)}"><b>${esc(x.day)}</b>${esc(x.time)}</div>`).join("")}</div>
     </div>`);
   const agent = $("n-agent");
   $("agent-state").textContent = "Checking calendar";
@@ -940,9 +940,10 @@ async function onOutcome(ev, alive) {
   await wait(2200); if (!alive()) return;
   if (b.key === "booked") {
     // highlight the slot the caller took in the calendar card, then show the booking
-    const pick = ev.meeting_slot && [...document.querySelectorAll(".slot")].find((x) => x.dataset.label.toLowerCase() === ev.meeting_slot.toLowerCase());
+    const want = (ev.meeting_slot || "").toLowerCase();
+    const pick = want && [...document.querySelectorAll(".slot")].find((x) => x.dataset.label.toLowerCase() === want || x.dataset.say.toLowerCase() === want);
     if (pick) { pick.classList.add("picked"); await wait(900); if (!alive()) return; }
-    const p = slotParts(ev.meeting_slot || "");
+    const p = slotParts(pick ? pick.dataset.label : ev.meeting_slot || "");
     add(`<div class="box route"><div class="head eyebrow">${svg("calendar")}Demo booked</div>
       ${ev.meeting_slot ? `<div class="booked"><div class="date"><div class="m">${esc(p.mon)}</div><div class="d">${esc(p.d)}</div></div><div class="when"><b>${esc(p.when)}</b>Product demo with an Acme specialist</div></div>` : ""}
       <div class="chips"><span class="tag">${svg("check", 'width="14" height="14"')}Booked by AI</span><span class="tag slate">No transfer</span></div>
