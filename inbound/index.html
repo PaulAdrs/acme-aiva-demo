@@ -295,6 +295,11 @@ button,input,select{font:inherit}
 .booked .date .d{font-family:var(--serif);font-size:28px;line-height:1.15;padding:3px 0;color:var(--text-primary)}
 .booked .when{font-size:13px;color:var(--text-secondary)}
 .booked .when b{display:block;font-size:15px;color:var(--text-primary)}
+.sms{margin:4px 0 12px;display:grid;gap:6px}
+.sms .bubble{justify-self:start;max-width:92%;background:#E9EEF0;color:var(--text-primary);border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:13.5px;line-height:1.4;opacity:0;transform:translateY(6px) scale(.98);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.sms .bubble.in{opacity:1;transform:none}
+.sms .meta{font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
+.sms .meta svg{width:13px;height:13px;color:var(--surface-brand)}
 .typing{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:13px;margin-top:4px}
 .typing b{display:inline-flex;gap:3px}
 .typing b i{width:5px;height:5px;border-radius:50%;background:var(--text-secondary);animation:dots 1.2s infinite}
@@ -487,6 +492,7 @@ const I = {
   shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
   calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
   target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  sms: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   route: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
 };
 const svg = (name, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${I[name]}</svg>`;
@@ -848,6 +854,7 @@ async function onAvailability(ev, alive) {
   $("typing").hidden = true;
   if (ev.reasoning) { think(ev.reasoning); await wait(1800); if (!alive()) return; }
   const slots = Array.isArray(ev.slots) ? ev.slots : [];
+  state.slots = slots;
   const el = add(`<div class="box cal">
       <div class="top">${svg("calendar")}<span class="eyebrow">Checking the sales calendar</span><span class="status eyebrow"><span class="spin"></span>Specialists</span></div>
       <div class="slots">${slots.map((x) => `<div class="slot" data-label="${esc(x.label)}" data-say="${esc(x.say || x.label)}"><b>${esc(x.day)}</b>${esc(x.time)}</div>`).join("")}</div>
@@ -865,6 +872,21 @@ async function onAvailability(ev, alive) {
   $("typing").hidden = state.ended;
 }
 
+// Resolves what the agent booked ("Wednesday at 2:30pm" or the full label) to a slot with a real date.
+const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+function resolveSlot(text) {
+  const t = String(text || "").toLowerCase().trim();
+  const hit = (state.slots || []).find((x) => [x.label, x.say].some((v) => v && v.toLowerCase() === t)) ||
+    (state.slots || []).find((x) => x.say && t.includes(x.say.toLowerCase().split(" at ")[0]) && t.includes(x.say.toLowerCase().split(" at ")[1]));
+  if (hit) return hit;
+  // No calendar card on screen: date the weekday itself (the next one from tomorrow).
+  const wd = WEEKDAYS.findIndex((w) => t.startsWith(w));
+  const date = new Date();
+  if (wd >= 0) { date.setDate(date.getDate() + 1); while (date.getDay() !== wd) date.setDate(date.getDate() + 1); }
+  const time = (t.match(/at (.+)$/) || [])[1] || "";
+  const day = date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }).replace(",", "");
+  return wd >= 0 ? { label: `${day} at ${time}`, say: text } : { label: text, say: text };
+}
 // "Wednesday 28 October at 10am" -> date tile parts
 function slotParts(label) {
   const m = String(label).match(/(\d{1,2})\s+([A-Za-z]+)/);
@@ -940,14 +962,19 @@ async function onOutcome(ev, alive) {
   await wait(2200); if (!alive()) return;
   if (b.key === "booked") {
     // highlight the slot the caller took in the calendar card, then show the booking
-    const want = (ev.meeting_slot || "").toLowerCase();
-    const pick = want && [...document.querySelectorAll(".slot")].find((x) => x.dataset.label.toLowerCase() === want || x.dataset.say.toLowerCase() === want);
+    const slot = ev.meeting_slot ? resolveSlot(ev.meeting_slot) : null;
+    const pick = slot && [...document.querySelectorAll(".slot")].find((x) => x.dataset.label === slot.label);
     if (pick) { pick.classList.add("picked"); await wait(900); if (!alive()) return; }
-    const p = slotParts(pick ? pick.dataset.label : ev.meeting_slot || "");
-    add(`<div class="box route"><div class="head eyebrow">${svg("calendar")}Demo booked</div>
-      ${ev.meeting_slot ? `<div class="booked"><div class="date"><div class="m">${esc(p.mon)}</div><div class="d">${esc(p.d)}</div></div><div class="when"><b>${esc(p.when)}</b>Product demo with an Acme specialist</div></div>` : ""}
-      <div class="chips"><span class="tag">${svg("check", 'width="14" height="14"')}Booked by AI</span><span class="tag slate">No transfer</span></div>
+    const p = slotParts(slot ? slot.label : "");
+    const short = slot ? slot.label.replace(/^(\w{3})\w*/, "$1").replace(/(\d{1,2}) (\w{3})\w*/, "$1 $2") : "";
+    const box = add(`<div class="box route"><div class="head eyebrow">${svg("calendar")}Demo booked</div>
+      ${slot ? `<div class="booked"><div class="date"><div class="m">${esc(p.mon)}</div><div class="d">${esc(p.d)}</div></div><div class="when"><b>${esc(slot.label)}</b>Product demo with an Acme specialist</div></div>
+      <div class="sms"><div class="bubble">Acme: your demo is booked for ${esc(short)}. A product specialist will call you on this number.</div>
+      <div class="meta">${svg("sms")}Confirmation SMS sent to ${esc(state.from || "the caller")}</div></div>` : ""}
+      <div class="chips"><span class="tag">${svg("check", 'width="14" height="14"')}Booked by AI</span><span class="tag slate">SMS confirmation</span><span class="tag slate">No transfer</span></div>
       ${ev.summary ? `<div class="note"><span class="eyebrow">Brief for the specialist</span><p>${esc(ev.summary)}</p></div>` : ""}</div>`);
+    const bub = box.querySelector(".bubble");
+    if (bub) { await wait(700); if (!alive()) return; bub.classList.add("in"); }
   } else if (b.key === "resolved") {
     add(`<div class="box route"><div class="head eyebrow">${svg("check")}Decision</div>
       <div class="chips"><span class="tag">${svg("check", 'width="14" height="14"')}Resolved by AI</span><span class="tag slate">No transfer</span></div>
@@ -1109,9 +1136,9 @@ const SCENARIOS = { faq: {
     [10000, { type: "lead_update", score: "warm", question: "Just spreadsheets at the moment, and we lose track of follow-ups.",
       products: "Acme CRM, Acme Automate", current_tool: "Spreadsheets",
       reasoning: "A 15-seat team with a real need, but no decision before next quarter. A good fit for a demo rather than a sales call today." }],
-    [14000, { type: "availability", slots: [{ label: "Wednesday 28 October at 10am", day: "Wed 28 Oct", time: "10:00" }, { label: "Wednesday 28 October at 2:30pm", day: "Wed 28 Oct", time: "14:30" }, { label: "Thursday 29 October at 11am", day: "Thu 29 Oct", time: "11:00" }],
+    [14000, { type: "availability", slots: [{ label: "Wednesday 28 October at 10am", say: "Wednesday at 10am", day: "Wed 28 Oct", time: "10:00" }, { label: "Wednesday 28 October at 2:30pm", say: "Wednesday at 2:30pm", day: "Wed 28 Oct", time: "14:30" }, { label: "Thursday 29 October at 11am", say: "Thursday at 11am", day: "Thu 29 Oct", time: "11:00" }],
       reasoning: "The caller agreed to a demo. Checking which specialist slots are free so I only offer real times." }],
-    [15000, { type: "outcome", outcome: "booked", meeting_slot: "Wednesday 28 October at 2:30pm",
+    [15000, { type: "outcome", outcome: "booked", meeting_slot: "Wednesday at 2:30pm",
       reasoning: "The caller picked Wednesday afternoon. The demo is booked and they need nothing else, so no transfer.",
       summary: "15 sales reps on spreadsheets, want Acme CRM plus Automate for lead follow-up. Deciding next quarter. Main pain: leads slip through without reminders." }],
     [8000, { type: "call_ended" }],
