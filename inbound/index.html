@@ -63,6 +63,7 @@ button,input,select{font:inherit}
 .tab{border:.5px solid var(--border);background:transparent;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--text-primary);cursor:pointer}
 .tab[aria-selected="true"]{background:var(--surface-invert);border-color:var(--surface-invert);color:var(--text-invert)}
 .tab[disabled]{cursor:default;color:#8DA09C}
+.cfg[hidden]{display:none!important}
 .tab[disabled] small{font-weight:500;margin-left:4px}
 .cfg{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-brand);text-decoration:none;white-space:nowrap;padding:6px 4px;border-radius:6px}
 .cfg:hover{text-decoration:underline}
@@ -262,6 +263,36 @@ button,input,select{font:inherit}
 .order .ship{display:flex;flex-wrap:wrap;gap:6px 16px;padding:10px 16px;border-top:.5px solid var(--border);font-size:13px;color:var(--text-secondary)}
 .order .ship b{color:var(--text-primary);font-weight:600}
 .order .miss-msg{padding:14px 16px;font-size:14px;color:var(--text-primary)}
+/* speed to lead: lead card, calendar check, booked demo */
+.lead,.cal{padding:0;overflow:hidden}
+.lead .top,.cal .top{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:.5px solid var(--border);color:var(--text-secondary)}
+.lead .top svg,.cal .top svg{width:16px;height:16px;color:var(--surface-brand)}
+.lead .top .status,.cal .top .status{margin-left:auto}
+.cal .top .status.hit{color:var(--text-brand)}
+.lrow{display:grid;grid-template-columns:112px 1fr;gap:10px;padding:9px 16px;font-size:14px;border-top:.5px solid #EEF0EA;opacity:.35;transition:opacity .5s}
+.lrow:first-of-type{border-top:0}
+.lrow.in{opacity:1}
+.lrow .k{color:var(--text-secondary);font-size:13px}
+.lrow .v{color:var(--text-primary);font-weight:600}
+.meter{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:12px 16px 4px;border-top:.5px solid var(--border)}
+.meter i{height:8px;border-radius:4px;background:#E6EBEA;transition:background .5s}
+.meter i.on.cold{background:#8FB1D9}.meter i.on.warm{background:#F0A93B}.meter i.on.hot{background:#E2703A}
+.meter-l{display:flex;justify-content:space-between;padding:4px 16px 12px;font-size:12px;color:var(--text-secondary)}
+.score{font-weight:700;border-radius:999px;padding:2px 10px;font-size:12px;opacity:0;transition:opacity .5s}
+.score.in{opacity:1}
+.score.cold{background:#E3EDF8;color:#3D628F}.score.warm{background:#FDF0DA;color:#8A5A0B}.score.hot{background:#FBE4D8;color:#A5441A}
+.cal .spin{border-color:#BDEBD9;border-top-color:var(--surface-brand)}
+.slots{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px 14px}
+.slot{border:.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.25;color:var(--text-secondary);opacity:0;transform:translateY(6px);transition:opacity .45s var(--ease),transform .45s var(--ease),border-color .4s,background .4s,box-shadow .4s}
+.slot.in{opacity:1;transform:none}
+.slot b{display:block;font-size:14px;color:var(--text-primary)}
+.slot.picked{border-color:var(--glow);background:#ECF8F3;box-shadow:0 0 0 3px rgba(0,179,134,.15)}
+.booked{display:flex;gap:14px;align-items:center;margin:4px 0 10px}
+.booked .date{width:58px;flex:none;border:.5px solid var(--border);border-radius:10px;text-align:center;overflow:hidden;background:#fff}
+.booked .date .m{background:var(--surface-brand);color:#fff;font-size:11px;font-weight:700;padding:2px 0;letter-spacing:.04em}
+.booked .date .d{font-family:var(--serif);font-size:28px;line-height:1.15;padding:3px 0;color:var(--text-primary)}
+.booked .when{font-size:13px;color:var(--text-secondary)}
+.booked .when b{display:block;font-size:15px;color:var(--text-primary)}
 .typing{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:13px;margin-top:4px}
 .typing b{display:inline-flex;gap:3px}
 .typing b i{width:5px;height:5px;border-radius:50%;background:var(--text-secondary);animation:dots 1.2s infinite}
@@ -311,7 +342,7 @@ button,input,select{font:inherit}
     <nav class="tabs" role="tablist" aria-label="Use case">
       <button class="tab" role="tab" aria-selected="true" data-uc="faq">FAQ + routing</button>
       <button class="tab" role="tab" aria-selected="false" data-uc="wismo">WISMO (Shopify)</button>
-      <button class="tab" role="tab" aria-selected="false" disabled>Speed to lead<small>soon</small></button>
+      <button class="tab" role="tab" aria-selected="false" data-uc="stl">Speed to lead</button>
     </nav>
     <a class="cfg" id="cfg" href="#" target="_blank" rel="noopener" title="Open this agent's configuration in the Aircall Dashboard">Agent config<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>
   </header>
@@ -427,7 +458,7 @@ try {
 } catch (_) {}
 if (params.has("key")) { params.delete("key"); history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash); }
 const FORCE_SIM = params.get("demo") === "1" || !WORKER_URL || !PASSCODE;
-let USE_CASE = params.get("uc") === "wismo" ? "wismo" : "faq";
+let USE_CASE = ["wismo", "stl"].includes(params.get("uc")) ? params.get("uc") : "faq";
 let SIMULATE = true, INBOUND_NUMBER = "";
 
 /* ===================== HELPERS ===================== */
@@ -452,6 +483,8 @@ const I = {
   truck: '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
   undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
   shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
   route: '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
 };
 const svg = (name, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${I[name]}</svg>`;
@@ -495,6 +528,22 @@ const UC = {
     ],
   },
 };
+UC.stl = {
+  title: "Speed to lead: qualify and book on the first call",
+  lead: "Call Acme's sales line as a new prospect. The AI Voice Agent qualifies you, scores the lead, then books a demo or puts a hot lead straight through to sales. Every step shows up here with the agent's reasoning.",
+  number: "", // the Aircall number the speed-to-lead agent answers on; empty = simulation
+  dial: "Call Acme sales",
+  agentSub: "Acme sales assistant",
+  config: "",
+  work: "", resolvedHead: "Lead qualified and demo booked by the AI",
+  resolvedLine: "The lead was qualified and a demo was booked in a single call. Your sales team only joins for the demo.",
+  tries: ['"I saw your ad, I\'m interested in Acme CRM"', '"We\'re a team of 40 and want to switch this month"', '"There are 8 of us, just looking for now"', '"I\'m already a customer and need help"'],
+  sims: [["booked", "Play: demo booked by the AI"], ["hot", "Play: hot lead, live transfer"]],
+  branches: [
+    { key: "sales",   x: 330, label: "Hot lead, ready now", title: "Sales team",         sub: "Ring for 30 sec", tint: "var(--tint-violet)", icon: "trend" },
+    { key: "support", x: 770, label: "Existing customer",   title: "Customer support",   sub: "Ring for 30 sec", tint: "var(--tint-sky)" },
+  ],
+};
 let BRANCHES = [], BR = {};
 function applyUseCase(key) {
   USE_CASE = key;
@@ -502,12 +551,14 @@ function applyUseCase(key) {
   BRANCHES = u.branches;
   BR = Object.fromEntries(BRANCHES.map((b) => [b.key, b]));
   BR.resolved = { key: "resolved", title: "Resolved by AI" };
+  BR.booked = { key: "booked", title: "Demo booked" };
   INBOUND_NUMBER = u.number;
   SIMULATE = FORCE_SIM || !INBOUND_NUMBER;
   $("uc-title").textContent = u.title;
   $("uc-lead").textContent = u.lead;
   $("dial-label").textContent = u.dial;
-  $("cfg").href = u.config;
+  $("cfg").hidden = !u.config;
+  if (u.config) $("cfg").href = u.config;
   $("try-list").innerHTML = u.tries.map((t) => `<li>${esc(t)}</li>`).join("");
   $("sim-actions").innerHTML = u.sims.map(([k, label], i) => `<button class="btn ${i ? "ghost" : "primary"}" data-scenario="${k}">${esc(label)}</button>`).join("");
   $("sim-badge").hidden = !SIMULATE;
@@ -718,13 +769,83 @@ async function onOrder(ev, alive) {
   $("typing").hidden = state.ended;
 }
 
+/* ===================== SPEED TO LEAD ===================== */
+const SCORE_LABEL = { cold: "Cold", warm: "Warm", hot: "Hot" };
+const SCORE_NEXT = { cold: "Not a fit yet: share next steps, no meeting", warm: "Good fit: book a demo with a specialist", hot: "Ready to buy: put through to sales now" };
+
+// The lead card: each answer lands in its row, then the score meter fills to cold, warm or hot.
+async function onLead(ev, alive) {
+  $("typing").hidden = true;
+  state.score = ev.score;
+  if (ev.question) { quote(ev.question); await wait(1400); if (!alive()) return; }
+  if (ev.reasoning) { think(ev.reasoning); await wait(2000); if (!alive()) return; }
+  const rows = [["Interested in", ev.products], ["Team size", ev.team_size], ["Timeline", ev.timeline], ["Current tool", ev.current_tool]];
+  const lvl = ["cold", "warm", "hot"].indexOf(ev.score);
+  const el = add(`<div class="box lead">
+      <div class="top">${svg("target")}<span class="eyebrow">Lead qualification</span><span class="status"><span class="score ${ev.score}">${SCORE_LABEL[ev.score] || ""} lead</span></span></div>
+      ${rows.map(([k]) => `<div class="lrow"><span class="k">${k}</span><span class="v">…</span></div>`).join("")}
+      <div class="meter"><i></i><i></i><i></i></div>
+      <div class="meter-l"><span>Cold</span><span>Warm</span><span>Hot</span></div>
+      <div class="answer"><div><div class="inner"><span class="eyebrow">Next step</span><p>${esc(SCORE_NEXT[ev.score] || "")}</p></div></div></div>
+    </div>`);
+  const agent = $("n-agent");
+  $("agent-state").textContent = "Qualifying";
+  agent.classList.add("fast");
+  const rEls = [...el.querySelectorAll(".lrow")];
+  for (let i = 0; i < rows.length; i++) {
+    await wait(i ? 650 : 400); if (!alive()) return;
+    rEls[i].querySelector(".v").textContent = rows[i][1] || "Not given";
+    rEls[i].classList.add("in");
+  }
+  const bars = [...el.querySelectorAll(".meter i")];
+  for (let i = 0; i <= lvl; i++) { await wait(450); if (!alive()) return; bars[i].classList.add("on", ev.score); }
+  await wait(400); if (!alive()) return;
+  el.querySelector(".score").classList.add("in");
+  await wait(600); if (!alive()) return;
+  el.querySelector(".answer").classList.add("open");
+  setTimeout(() => { $("pbody").scrollTop = $("pbody").scrollHeight; }, 950);
+  agent.classList.remove("fast");
+  $("agent-state").textContent = "On the call";
+  await wait(1600);
+  $("typing").hidden = state.ended;
+}
+
+// Calendar check: a loading card, then the open slots drop in one by one.
+async function onAvailability(ev, alive) {
+  state.kbCount++;
+  $("typing").hidden = true;
+  if (ev.reasoning) { think(ev.reasoning); await wait(1800); if (!alive()) return; }
+  const slots = Array.isArray(ev.slots) ? ev.slots : [];
+  const el = add(`<div class="box cal">
+      <div class="top">${svg("calendar")}<span class="eyebrow">Checking the sales calendar</span><span class="status eyebrow"><span class="spin"></span>Specialists</span></div>
+      <div class="slots">${slots.map((x) => `<div class="slot" data-label="${esc(x.label)}"><b>${esc(x.day)}</b>${esc(x.time)}</div>`).join("")}</div>
+    </div>`);
+  const agent = $("n-agent");
+  $("agent-state").textContent = "Checking calendar";
+  agent.classList.add("fast");
+  await wait(1600); if (!alive()) return;
+  const status = el.querySelector(".status");
+  status.className = "status eyebrow hit"; status.textContent = `${slots.length} slots free`;
+  for (const s of el.querySelectorAll(".slot")) { await wait(260); if (!alive()) return; s.classList.add("in"); }
+  agent.classList.remove("fast");
+  $("agent-state").textContent = "On the call";
+  await wait(1400);
+  $("typing").hidden = state.ended;
+}
+
+// "Wednesday 28 October at 10am" -> date tile parts
+function slotParts(label) {
+  const m = String(label).match(/(\d{1,2})\s+([A-Za-z]+)/);
+  return { d: m ? m[1] : "", mon: m ? m[2].slice(0, 3).toUpperCase() : "", when: label };
+}
+
 /* ===================== EVENT RENDERER ===================== */
 // The same renderer plays simulated and live events. Event shapes (from the Worker):
 //   call_created / call_answered / call_ended            {type, at}
 //   kb_search  {type, at, question, match_id|null, reasoning}
 //   outcome    {type, at, outcome: resolved|billing|technical|sales|care, reasoning, summary}
 let state;
-function resetState() { state = { started: false, ended: false, kbCount: 0, outcome: null, endTimer: 0 }; }
+function resetState() { state = { started: false, ended: false, kbCount: 0, outcome: null, endTimer: 0, score: null }; }
 
 async function handle(ev, alive) {
   if (!alive()) return;
@@ -736,6 +857,8 @@ async function handle(ev, alive) {
   if (!alive()) return;
   if (ev.type === "kb_search") await onKb(ev, alive);
   else if (ev.type === "order_lookup") await onOrder(ev, alive);
+  else if (ev.type === "lead_update") await onLead(ev, alive);
+  else if (ev.type === "availability") await onAvailability(ev, alive);
   else if (ev.type === "outcome") await onOutcome(ev, alive);
   else if (ev.type === "call_ended") await onEnded(ev, alive);
 }
@@ -777,12 +900,21 @@ async function onKb(ev, alive) {
 }
 
 async function onOutcome(ev, alive) {
-  const b = BR[ev.outcome] || BR.care;
+  const b = BR[ev.outcome] || BR.care || BRANCHES[BRANCHES.length - 1];
   state.outcome = b.key;
   $("typing").hidden = true;
   if (ev.reasoning) think(ev.reasoning);
   await wait(2200); if (!alive()) return;
-  if (b.key === "resolved") {
+  if (b.key === "booked") {
+    // highlight the slot the caller took in the calendar card, then show the booking
+    const pick = ev.meeting_slot && [...document.querySelectorAll(".slot")].find((x) => x.dataset.label.toLowerCase() === ev.meeting_slot.toLowerCase());
+    if (pick) { pick.classList.add("picked"); await wait(900); if (!alive()) return; }
+    const p = slotParts(ev.meeting_slot || "");
+    add(`<div class="box route"><div class="head eyebrow">${svg("calendar")}Demo booked</div>
+      ${ev.meeting_slot ? `<div class="booked"><div class="date"><div class="m">${esc(p.mon)}</div><div class="d">${esc(p.d)}</div></div><div class="when"><b>${esc(p.when)}</b>Product demo with an Acme specialist</div></div>` : ""}
+      <div class="chips"><span class="tag">${svg("check", 'width="14" height="14"')}Booked by AI</span><span class="tag slate">No transfer</span></div>
+      ${ev.summary ? `<div class="note"><span class="eyebrow">Brief for the specialist</span><p>${esc(ev.summary)}</p></div>` : ""}</div>`);
+  } else if (b.key === "resolved") {
     add(`<div class="box route"><div class="head eyebrow">${svg("check")}Decision</div>
       <div class="chips"><span class="tag">${svg("check", 'width="14" height="14"')}Resolved by AI</span><span class="tag slate">No transfer</span></div>
       ${ev.summary ? `<div class="note"><span class="eyebrow">Summary logged</span><p>${esc(ev.summary)}</p></div>` : ""}</div>`);
@@ -801,13 +933,13 @@ async function onOutcome(ev, alive) {
     $("w-d_" + x.key).classList.add("dimmed"); $("w-u_" + x.key).classList.add("dimmed");
   });
 
-  if (b.key === "resolved") {
+  if (b.key === "resolved" || b.key === "booked") {
     // The AI resolved it: the call ends at the agent. Nothing flows further down.
     state.aiEnd = Date.now();
-    $("agent-state").textContent = "Resolved";
+    $("agent-state").textContent = b.key === "booked" ? "Demo booked" : "Resolved";
     ["r2", "r5", "n-out"].forEach((id) => $(id).classList.add("dimmed"));
-    badge("b-end", CX, Y.r2 + 6, "ai", `${svg("check", 'width="15" height="15"')}Resolved by AI, call ends here`);
-    sys("check", "The AI resolved the call. No transfer, so the call ends here.", ev.at);
+    badge("b-end", CX, Y.r2 + 6, "ai", `${svg("check", 'width="15" height="15"')}${b.key === "booked" ? "Demo booked by AI" : "Resolved by AI"}, call ends here`);
+    sys("check", b.key === "booked" ? "The AI booked the demo. No transfer, so the call ends here." : "The AI resolved the call. No transfer, so the call ends here.", ev.at);
   } else {
     // Transfer: the AI's part ends at the handover; the team finishes the call with the note.
     $("agent-state").textContent = "Transferring";
@@ -828,7 +960,7 @@ async function onOutcome(ev, alive) {
   clearTimeout(state.endTimer);
   const myRun = run;
   state.endTimer = setTimeout(() => { if (myRun === run && !state.ended) enqueue({ type: "call_ended", at: Date.now(), synthetic: true }); },
-    b.key === "resolved" ? END_FALLBACK_MS : state.webhook ? END_FALLBACK_WEBHOOK_MS : END_FALLBACK_TRANSFER_MS);
+    b.key === "resolved" || b.key === "booked" ? END_FALLBACK_MS : state.webhook ? END_FALLBACK_WEBHOOK_MS : END_FALLBACK_TRANSFER_MS);
 }
 
 function badge(id, x, y, kind, html) {
@@ -849,7 +981,8 @@ async function onEnded(ev, alive) {
   const key = state.outcome;
   const b = key ? BR[key] : null;
   $("n-agent").classList.remove("breathe", "fast");
-  if (b && key !== "resolved") {
+  const aiDone = key === "resolved" || key === "booked";
+  if (b && !aiDone) {
     // the team's part of the call, drawn in the team colour
     const team = $("n-" + key);
     team.classList.remove("human"); team.classList.add("human-solid");
@@ -861,15 +994,18 @@ async function onEnded(ev, alive) {
     $("n-out").classList.add("done");
   }
   stopTimer();
-  sys("phoneOff", !b ? "The caller hung up" : key === "resolved" ? "Call ended by the AI" : `${esc(b.title)} finished the call`, ev.at);
+  sys("phoneOff", !b ? "The caller hung up" : aiDone ? "Call ended by the AI" : `${esc(b.title)} finished the call`, ev.at);
   await wait(1200); if (!alive()) return;
   const aiTime = mmss((state.aiEnd || ev.at || Date.now()) - t0);
-  const headline = !b ? "Call ended before a decision" : key === "resolved" ? "Resolved by the AI, no agent needed" : `AI handed over to ${b.title}, with context`;
+  const u = UC[USE_CASE];
+  const headline = !b ? "Call ended before a decision" : key === "booked" ? u.resolvedHead : key === "resolved" ? "Resolved by the AI, no agent needed" : `AI handed over to ${b.title}, with context`;
   const line = !b ? "The caller hung up before the agent reached an outcome." :
-    key === "resolved" ? UC[USE_CASE].resolvedLine :
+    key === "booked" ? u.resolvedLine : key === "resolved" ? (USE_CASE === "stl" ? "The caller got what they needed from the AI, without a transfer." : u.resolvedLine) :
     `The AI handled the first ${aiTime}, then passed the caller and the handover note to the ${b.title.toLowerCase()}. The team resolved it without asking the caller to start again.`;
   add(`<div class="outcome"><span class="eyebrow">Outcome</span><h3>${esc(headline)}</h3><p>${esc(line)}</p>
-    <div class="stats"><div><strong>${aiTime}</strong>handled by AI</div><div><strong>${state.kbCount}</strong>${UC[USE_CASE].work}${state.kbCount === 1 ? "" : (USE_CASE === "faq" ? "es" : "s")}</div><div><strong>${b && key !== "resolved" ? "1" : "0"}</strong>${b && key !== "resolved" ? "handover" : "handovers"}</div></div>
+    <div class="stats"><div><strong>${aiTime}</strong>handled by AI</div>${USE_CASE === "stl"
+      ? `<div><strong>${esc(SCORE_LABEL[state.score] || "–")}</strong>lead score</div><div><strong>${key === "booked" ? "1" : "0"}</strong>${key === "booked" ? "demo booked" : "demos booked"}</div>`
+      : `<div><strong>${state.kbCount}</strong>${u.work}${state.kbCount === 1 ? "" : (USE_CASE === "faq" ? "es" : "s")}</div>`}<div><strong>${b && !aiDone ? "1" : "0"}</strong>${b && !aiDone ? "handover" : "handovers"}</div></div>
     <button class="btn ghost again" id="again">Run another demo</button></div>`);
   $("again").onclick = () => reset(true);
 }
@@ -925,6 +1061,29 @@ const SCENARIOS = { faq: {
     [16000, { type: "outcome", outcome: "delivery",
       reasoning: "Marked delivered but the caller doesn't have it. That needs a carrier claim, which only the delivery team can open.",
       summary: "Order 1002, oak side table, DPD marked delivered to a safe place on 17 October. Caller has checked with neighbours and it isn't there. Needs a missing-parcel claim." }],
+    [18000, { type: "call_ended" }],
+  ],
+}, stl: {
+  booked: [
+    [2500, { type: "call_created" }],
+    [20000, { type: "lead_update", score: "warm", question: "Hi, I saw your ad. We're looking at a new CRM for our sales team.",
+      products: "Acme CRM, Acme Automate", team_size: "15 sales reps", timeline: "Next quarter", current_tool: "Spreadsheets",
+      reasoning: "A 15-seat team with a real need, but no decision before next quarter. A good fit for a demo rather than a sales call today." }],
+    [14000, { type: "availability", slots: [{ label: "Wednesday 28 October at 10am", day: "Wed 28 Oct", time: "10:00" }, { label: "Wednesday 28 October at 2:30pm", day: "Wed 28 Oct", time: "14:30" }, { label: "Thursday 29 October at 11am", day: "Thu 29 Oct", time: "11:00" }],
+      reasoning: "The caller agreed to a demo. Checking which specialist slots are free so I only offer real times." }],
+    [15000, { type: "outcome", outcome: "booked", meeting_slot: "Wednesday 28 October at 2:30pm",
+      reasoning: "The caller picked Wednesday afternoon. The demo is booked and they need nothing else, so no transfer.",
+      summary: "15 sales reps on spreadsheets, want Acme CRM plus Automate for lead follow-up. Deciding next quarter. Main pain: leads slip through without reminders." }],
+    [8000, { type: "call_ended" }],
+  ],
+  hot: [
+    [2500, { type: "call_created" }],
+    [20000, { type: "lead_update", score: "hot", question: "We're 60 people on Zendesk and our contract ends this month. Can we move fast?",
+      products: "Acme Support Desk", team_size: "60 agents", timeline: "This month", current_tool: "Zendesk, renewal due",
+      reasoning: "Sixty seats, a renewal deadline this month and a clear need. This is a hot lead, so a rep should speak to them now, not next week." }],
+    [12000, { type: "outcome", outcome: "sales",
+      reasoning: "Hot lead with a deadline. Putting them straight through to an account executive while they're on the line.",
+      summary: "60-agent support team moving off Zendesk, renewal ends this month. Interested in Acme Support Desk. Wants pricing and a migration plan this week." }],
     [18000, { type: "call_ended" }],
   ],
 } };
